@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
 
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
-  void checkForUpdate() {
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ★ 起動時に強制更新チェック
     html.window.navigator.serviceWorker?.getRegistrations().then((regs) {
       for (var reg in regs) {
         reg.update().then((_) {
-          // 新しい SW が見つかったら即リロード
           reg.onUpdateFound?.listen((event) {
             html.window.location.reload();
           });
@@ -17,19 +26,14 @@ class SplashPage extends StatelessWidget {
     });
   }
 
-  void goHome(BuildContext context) {
+  void goHome() {
     Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
   Widget build(BuildContext context) {
-    // 画面描画後に強制更新チェックを実行
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkForUpdate();
-    });
-
     return GestureDetector(
-      onTap: () => goHome(context),
+      onTap: goHome,
       child: Scaffold(
         body: Stack(
           children: [
