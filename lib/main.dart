@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'SplashPage.dart';     // ← 追加（スプラッシュ画面）
-import 'HomePage.dart';       // ← ホーム画面
-import 'search_page.dart';    // ← 経路検索画面
+// ここを相対パス → package パスに変更
+import 'package:transit_app/SplashPage.dart';   // スプラッシュ画面
+import 'package:transit_app/HomePage.dart';     // ホーム画面
+import 'package:transit_app/search_page.dart';  // 経路検索画面
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,8 +56,8 @@ class MyApp extends StatelessWidget {
       home: const SplashPage(),
 
       routes: {
-        "/home": (_) => const HomePage(),     // ← ホーム画面
-        "/search": (_) => const SearchPage(), // ← 経路検索画面
+        "/home": (_) => const HomePage(),     // ホーム画面
+        "/search": (_) => const SearchPage(), // 経路検索画面
       },
     );
   }
