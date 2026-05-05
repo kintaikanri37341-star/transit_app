@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// ここを相対パス → package パスに変更
-import 'package:transit_app/SplashPage.dart';   // スプラッシュ画面
-import 'package:transit_app/HomePage.dart';     // ホーム画面
-import 'package:transit_app/search_page.dart';  // 経路検索画面
+// ★ プロジェクト名 TRANSIT_APP に合わせて修正（大文字）
+import 'package:TRANSIT_APP/SplashPage.dart';   // スプラッシュ画面
+import 'package:TRANSIT_APP/HomePage.dart';     // ホーム画面
+import 'package:TRANSIT_APP/search_page.dart';  // 経路検索画面
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
