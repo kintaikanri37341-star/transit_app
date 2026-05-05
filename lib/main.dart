@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'HomePage.dart';       // ← 追加
-import 'search_page.dart';   // ← 経路検索画面
+
+import 'SplashPage.dart';     // ← 追加（スプラッシュ画面）
+import 'HomePage.dart';       // ← ホーム画面
+import 'search_page.dart';    // ← 経路検索画面
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,11 +51,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
 
-      // ★ ここが一番重要 ★
-      home: const HomePage(),   // ← トップ画面を HomePage に変更
+      // ★ 起動時は SplashPage を表示する
+      home: const SplashPage(),
 
       routes: {
-        "/search": (_) => const SearchPage(),  // ← 経路検索画面
+        "/home": (_) => const HomePage(),     // ← ホーム画面
+        "/search": (_) => const SearchPage(), // ← 経路検索画面
       },
     );
   }
