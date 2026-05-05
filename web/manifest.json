@@ -2,6 +2,7 @@
   "name": "三木町コミュニティバス",
   "short_name": "三木町バス",
   "start_url": "/transit_app/",
+  "scope": "/transit_app/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
