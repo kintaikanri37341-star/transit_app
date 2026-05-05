@@ -1,10 +1,11 @@
 {
-  "name": "三木町コミバス",
-  "short_name": "三木バス",
-  "start_url": "/",
+  "name": "三木町コミュニティバス",
+  "short_name": "三木町バス",
+  "start_url": "/transit_app/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icons/Icon-192.png",
