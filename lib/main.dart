@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// ★ プロジェクト名 TRANSIT_APP に合わせて修正（大文字）
-import 'package:TRANSIT_APP/SplashPage.dart';   // スプラッシュ画面
-import 'package:TRANSIT_APP/HomePage.dart';     // ホーム画面
-import 'package:TRANSIT_APP/search_page.dart';  // 経路検索画面
+// ★ pubspec.yaml の name: transit_app を使う（小文字）
+import 'package:transit_app/SplashPage.dart';
+import 'package:transit_app/HomePage.dart';
+import 'package:transit_app/search_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   print('=== Flutter 起動チェック: OK ===');
 
-  // Supabase 初期化テスト
   try {
     await Supabase.initialize(
       url: 'https://ntctviniqtywczrdeubc.supabase.co',
@@ -23,7 +22,6 @@ void main() async {
     print(e);
   }
 
-  // Supabase クエリテスト
   try {
     final response = await Supabase.instance.client
         .from('trips_final')
@@ -52,12 +50,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
 
-      // ★ 起動時は SplashPage を表示する
       home: const SplashPage(),
 
       routes: {
-        "/home": (_) => const HomePage(),     // ホーム画面
-        "/search": (_) => const SearchPage(), // 経路検索画面
+        "/home": (_) => const HomePage(),
+        "/search": (_) => const SearchPage(),
       },
     );
   }
