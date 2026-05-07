@@ -14,7 +14,8 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    // ★ 起動時に強制更新チェック
+    // ★ 起動時の強制更新チェック（いったん無効化）
+    /*
     html.window.navigator.serviceWorker?.getRegistrations().then((regs) {
       for (var reg in regs) {
         reg.update().then((_) {
@@ -24,6 +25,7 @@ class _SplashPageState extends State<SplashPage> {
         });
       }
     });
+    */
   }
 
   void goHome() {
