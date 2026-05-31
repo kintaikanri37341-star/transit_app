@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ImagePage(
                                     title: "バス停を探す",
-                                    imagePath: "assets/images/heiyabu-rosen.jpg",
+                                    imagePath: "assets/images/heiyabu-rosenzu.jpg",
                                   ),
                                 ),
                               );
@@ -144,7 +144,7 @@ class HomePage extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ImagePage(
                                     title: "山南地区デマンドバス",
-                                    imagePath: "assets/images/demand.jpg",
+                                    imagePath: "assets/images/demand-bus.jpg",
                                   ),
                                 ),
                               );
