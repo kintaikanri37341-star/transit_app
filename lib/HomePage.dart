@@ -14,11 +14,11 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // ← ヘッダー背景なし
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.white,
 
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // ← 完全透明
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,11 +43,8 @@ class HomePage extends StatelessWidget {
 
       body: Column(
         children: [
-          const SizedBox(height: 80), // AppBar の分だけ余白
+          const SizedBox(height: 80),
 
-          // -----------------------------------
-          // 大きなメインロゴ（画面上1/3）
-          // -----------------------------------
           Expanded(
             flex: 1,
             child: Center(
@@ -59,9 +56,6 @@ class HomePage extends StatelessWidget {
             ),
           ),
 
-          // -----------------------------------
-          // 6つのボタン（スクロールなし固定配置）
-          // -----------------------------------
           Expanded(
             flex: 2,
             child: Padding(
@@ -124,17 +118,9 @@ class HomePage extends StatelessWidget {
                           child: _menuButton(
                             color: const Color(0xFFFFF9C4),
                             icon: Icons.help_outline,
-                            text: "利用方法",
+                            text: "利用方法等",
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ImagePage(
-                                    title: "利用方法",
-                                    imagePath: "assets/images/riyouhouhou-bellken.jpg",
-                                  ),
-                                ),
-                              );
+                              _openUrl("https://www.town.miki.lg.jp/life/dtl.php?hdnKey=1006");
                             },
                           ),
                         ),
@@ -182,7 +168,6 @@ class HomePage extends StatelessWidget {
             ),
           ),
 
-          // フッター
           SizedBox(
             height: 70,
             width: double.infinity,
@@ -259,7 +244,9 @@ class ImagePage extends StatelessWidget {
         foregroundColor: Colors.black,
       ),
       body: Center(
-        child: InteractiveViewer( // ← 拡大可能
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 10.0, // ← 10倍ズーム
           child: Image.asset(imagePath),
         ),
       ),
