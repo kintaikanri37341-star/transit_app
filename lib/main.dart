@@ -22,6 +22,18 @@ void main() async {
     print(e);
   }
 
+  // ★★★ Supabase 自動アクセス（停止防止）★★★
+  try {
+    await Supabase.instance.client
+        .from('trips_adjacent')
+        .select('seq')
+        .limit(1);
+    print('=== Supabase 自動アクセス成功（停止防止OK） ===');
+  } catch (e) {
+    print('=== Supabase 自動アクセス失敗 ===');
+    print(e);
+  }
+
   try {
     final response = await Supabase.instance.client
         .from('trips_final')
