@@ -15,7 +15,7 @@ class _SearchPageState extends State<SearchPage> {
   String? arrive;
 
   List<String> allStations = [];
-  List<String> filteredStations = [];
+  List<String> tempList = []; // ← 検索結果が消えないように外へ移動
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() {
       allStations = setStations;
-      filteredStations = List.from(allStations);
+      tempList = List.from(allStations);
     });
   }
 
@@ -76,45 +76,64 @@ class _SearchPageState extends State<SearchPage> {
     final key = isDepart ? 'recent_depart' : 'recent_arrive';
     List<String> recentStations = await loadRecentStations(key);
 
+    TextEditingController controller = TextEditingController();
+    String keyword = "";
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
       builder: (_) {
-        String keyword = "";
-        List<String> tempList = List.from(allStations);
-
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   // 🔍 検索欄
                   TextField(
-                    decoration: const InputDecoration(
+                    controller: controller,
+                    style: const TextStyle(fontSize: 20),
+                    decoration: InputDecoration(
                       labelText: '駅名を検索',
-                      prefixIcon: Icon(Icons.search),
+                      labelStyle: const TextStyle(fontSize: 20),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: keyword.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                controller.clear();
+                                setModalState(() {
+                                  keyword = "";
+                                  tempList = allStations;
+                                });
+                              },
+                            )
+                          : null,
                     ),
                     onChanged: (v) {
                       keyword = v;
-                      tempList = allStations
-                          .where((s) => s.contains(keyword))
-                          .toList();
-                      setModalState(() {});
+                      setModalState(() {
+                        tempList = allStations
+                            .where((s) => s.contains(keyword))
+                            .toList();
+                      });
                     },
                   ),
 
                   const SizedBox(height: 16),
 
-                  // ⭐ 最近使った駅（削除ボタン付き）
+                  // ⭐ 最近使った駅
                   if (recentStations.isNotEmpty) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         '最近使った駅',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -122,7 +141,10 @@ class _SearchPageState extends State<SearchPage> {
 
                     ...recentStations.map((station) => ListTile(
                           leading: const Icon(Icons.history),
-                          title: Text(station),
+                          title: Text(
+                            station,
+                            style: const TextStyle(fontSize: 20),
+                          ),
                           trailing: IconButton(
                             icon: const Icon(Icons.close),
                             onPressed: () async {
@@ -150,14 +172,16 @@ class _SearchPageState extends State<SearchPage> {
                   ],
 
                   // 🔽 駅一覧
-                  SizedBox(
-                    height: 400,
+                  Expanded(
                     child: ListView.builder(
                       itemCount: tempList.length,
                       itemBuilder: (_, i) {
                         final station = tempList[i];
                         return ListTile(
-                          title: Text(station),
+                          title: Text(
+                            station,
+                            style: const TextStyle(fontSize: 20),
+                          ),
                           onTap: () async {
                             setState(() {
                               if (isDepart) {
@@ -186,7 +210,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('経路検索')),
+      appBar: AppBar(title: const Text('経路検索', style: TextStyle(fontSize: 22))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -195,7 +219,10 @@ class _SearchPageState extends State<SearchPage> {
             // 出発駅
             ElevatedButton(
               onPressed: () => openStationSelector(true),
-              child: Text(depart ?? '出発駅を選択'),
+              child: Text(
+                depart ?? '出発駅を選択',
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -203,7 +230,10 @@ class _SearchPageState extends State<SearchPage> {
             // 到着駅
             ElevatedButton(
               onPressed: () => openStationSelector(false),
-              child: Text(arrive ?? '到着駅を選択'),
+              child: Text(
+                arrive ?? '到着駅を選択',
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
 
             const SizedBox(height: 24),
@@ -222,7 +252,35 @@ class _SearchPageState extends State<SearchPage> {
                       );
                     }
                   : null,
-              child: const Text('検索する'),
+              child: const Text('検索する', style: TextStyle(fontSize: 20)),
+            ),
+
+            // 🔻 注意書き（上下中央配置）
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      '日曜日・祝日・年末年始は運休です。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      '交通状況により、到着時間が遅れることがあります。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'あらかじめご承知おきください。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
