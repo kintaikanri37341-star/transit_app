@@ -15,7 +15,7 @@ class _SearchPageState extends State<SearchPage> {
   String? arrive;
 
   List<String> allStations = [];
-  List<String> tempList = []; // ← 検索結果保持用
+  List<String> tempList = [];
 
   @override
   void initState() {
@@ -23,7 +23,6 @@ class _SearchPageState extends State<SearchPage> {
     loadStations();
   }
 
-  // 🔹 Supabase から駅一覧を取得
   Future<void> loadStations() async {
     final res = await Supabase.instance.client
         .from('trips_adjacent')
@@ -41,7 +40,6 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  // 🔹 最近使った駅（出発 or 到着）を保存（最大5件）
   Future<void> saveRecentStation(String key, String station) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> recent = prefs.getStringList(key) ?? [];
@@ -56,13 +54,11 @@ class _SearchPageState extends State<SearchPage> {
     await prefs.setStringList(key, recent);
   }
 
-  // 🔹 最近使った駅を読み込む
   Future<List<String>> loadRecentStations(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(key) ?? [];
   }
 
-  // 🔹 最近使った駅を削除
   Future<void> deleteRecentStation(String key, String station) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> recent = prefs.getStringList(key) ?? [];
@@ -71,7 +67,6 @@ class _SearchPageState extends State<SearchPage> {
     await prefs.setStringList(key, recent);
   }
 
-  // 🔹 駅選択 BottomSheet
   void openStationSelector(bool isDepart) async {
     final key = isDepart ? 'recent_depart' : 'recent_arrive';
     List<String> recentStations = await loadRecentStations(key);
@@ -79,7 +74,6 @@ class _SearchPageState extends State<SearchPage> {
     TextEditingController controller = TextEditingController();
     String keyword = "";
 
-    // 再度開いたときに検索欄が空なら全駅表示
     tempList = List.from(allStations);
 
     showModalBottomSheet(
@@ -96,26 +90,21 @@ class _SearchPageState extends State<SearchPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // 🔙 戻るボタン
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.arrow_back),
-                      label: const Text(
-                        '戻る',
-                        style: TextStyle(fontSize: 22),
-                      ),
+                      label: const SizedBox.shrink(),
                     ),
                   ),
 
-                  // 🔍 検索欄
                   TextField(
                     controller: controller,
-                    style: const TextStyle(fontSize: 22),
+                    style: const TextStyle(fontSize: 20),
                     decoration: InputDecoration(
                       labelText: '駅名を検索',
-                      labelStyle: const TextStyle(fontSize: 22),
+                      labelStyle: const TextStyle(fontSize: 20),
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: keyword.isNotEmpty
                           ? IconButton(
@@ -142,14 +131,13 @@ class _SearchPageState extends State<SearchPage> {
 
                   const SizedBox(height: 16),
 
-                  // ⭐ 最近使った駅
                   if (recentStations.isNotEmpty) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         '最近使った駅',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -159,7 +147,7 @@ class _SearchPageState extends State<SearchPage> {
                           leading: const Icon(Icons.history),
                           title: Text(
                             station,
-                            style: const TextStyle(fontSize: 22),
+                            style: const TextStyle(fontSize: 20),
                           ),
                           trailing: IconButton(
                             icon: const Icon(Icons.close),
@@ -187,7 +175,6 @@ class _SearchPageState extends State<SearchPage> {
                     const Divider(),
                   ],
 
-                  // 🔽 駅一覧
                   Expanded(
                     child: ListView.builder(
                       itemCount: tempList.length,
@@ -196,7 +183,7 @@ class _SearchPageState extends State<SearchPage> {
                         return ListTile(
                           title: Text(
                             station,
-                            style: const TextStyle(fontSize: 22),
+                            style: const TextStyle(fontSize: 20),
                           ),
                           onTap: () async {
                             setState(() {
@@ -226,23 +213,24 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFC8E6C9), // ← 背景色
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('経路検索', style: TextStyle(fontSize: 22)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        title: const Text('経路検索', style: TextStyle(fontSize: 20)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 出発駅
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFFC8E6C9),
                 foregroundColor: Colors.black,
                 side: const BorderSide(color: Colors.black, width: 2),
                 textStyle: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -252,14 +240,13 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 16),
 
-            // 到着駅
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFFC8E6C9),
                 foregroundColor: Colors.black,
                 side: const BorderSide(color: Colors.black, width: 2),
                 textStyle: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -269,14 +256,13 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 24),
 
-            // 検索ボタン
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFFC8E6C9),
                 foregroundColor: Colors.black,
                 side: const BorderSide(color: Colors.black, width: 2),
                 textStyle: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -296,7 +282,6 @@ class _SearchPageState extends State<SearchPage> {
               child: const Text('検索する'),
             ),
 
-            // 🔻 注意書き（中央配置）
             Expanded(
               child: Center(
                 child: Column(
@@ -305,19 +290,19 @@ class _SearchPageState extends State<SearchPage> {
                     Text(
                       '日曜日・祝日・年末年始は運休です。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 16),
                     Text(
                       '交通状況により、到着時間が遅れることがあります。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 16),
                     Text(
                       'あらかじめご承知おきください。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(fontSize: 20),
                     ),
                   ],
                 ),
