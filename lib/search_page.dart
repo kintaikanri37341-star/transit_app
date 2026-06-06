@@ -212,6 +212,16 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final buttonStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFC8E6C9),
+      foregroundColor: Colors.black,
+      side: const BorderSide(color: Colors.black, width: 2),
+      textStyle: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -224,48 +234,36 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text(
+              '出発駅',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8E6C9),
-                foregroundColor: Colors.black,
-                side: const BorderSide(color: Colors.black, width: 2),
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              style: buttonStyle,
               onPressed: () => openStationSelector(true),
               child: Text(depart ?? '出発駅を選択'),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+
+            const Text(
+              '到着駅',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
 
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8E6C9),
-                foregroundColor: Colors.black,
-                side: const BorderSide(color: Colors.black, width: 2),
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              style: buttonStyle,
               onPressed: () => openStationSelector(false),
               child: Text(arrive ?? '到着駅を選択'),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 72), // ← ボタン1.5個分の間隔
 
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8E6C9),
-                foregroundColor: Colors.black,
-                side: const BorderSide(color: Colors.black, width: 2),
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              style: buttonStyle,
               onPressed: (depart != null && arrive != null)
                   ? () {
                       Navigator.push(
