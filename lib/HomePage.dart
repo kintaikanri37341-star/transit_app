@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
             flex: 1,
             child: Center(
               child: Image.asset(
-                "assets/images/main_logo.png",
+                "assets/images/main_logo_new.png",
                 fit: BoxFit.contain,
                 width: double.infinity,
               ),
@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ImagePage(
                                     title: "バス停を探す",
-                                    imagePath: "assets/images/heiyabu-rosenzu.jpg",
+                                    imagePath: "assets/images/heiyabu-rosen.jpg",
                                   ),
                                 ),
                               );
