@@ -43,20 +43,21 @@ class HomePage extends StatelessWidget {
 
       body: Column(
         children: [
-          const SizedBox(height: 80),
+          // 🔥 ヘッダー下の余白を縮めて赤枠を吸収
+          const SizedBox(height: 20),
 
-          // 🔥 main_logo を上に寄せつつ大きく表示
+          // 🔥 メインロゴ領域を拡大（赤枠も含める）
           Expanded(
-            flex: 13, // ← ロゴの縦位置を上げる
+            flex: 20,
             child: Center(
               child: Image.asset(
                 "assets/images/main_logo_new.png",
-                fit: BoxFit.contain,
+                fit: BoxFit.contain, // ← 縦横比は絶対に崩れない
               ),
             ),
           ),
 
-          // 🔥 ボタン部分（縦幅を広げる）
+          // 🔥 ボタン部分（ここは一切変更しない）
           Expanded(
             flex: 27,
             child: Padding(
@@ -165,7 +166,6 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
 
-                  // 🔥 下段ボタンと footer_logo の間に余白を追加
                   const SizedBox(height: 20),
                 ],
               ),
