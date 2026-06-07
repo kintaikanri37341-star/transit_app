@@ -46,9 +46,9 @@ class HomePage extends StatelessWidget {
           // 🔥 ヘッダー下の余白を縮めて赤枠を吸収
           const SizedBox(height: 20),
 
-          // 🔥 メインロゴ領域を拡大（赤枠も含める）
+          // 🔥 メインロゴ領域（flex: 16 に調整）
           Expanded(
-            flex: 20,
+            flex: 16,
             child: Center(
               child: Image.asset(
                 "assets/images/main_logo_new.png",
