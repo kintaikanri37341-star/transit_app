@@ -43,12 +43,12 @@ class HomePage extends StatelessWidget {
 
       body: Column(
         children: [
-          // 🔥 ヘッダー下の余白を縮めて赤枠を吸収
-          const SizedBox(height: 20),
+          // 🔥 ヘッダー下の余白を 80 → 40 に縮める
+          const SizedBox(height: 40),
 
-          // 🔥 メインロゴ領域（flex: 16 に調整）
+          // 🔥 メインロゴ領域（flex: 15 に調整）
           Expanded(
-            flex: 16,
+            flex: 15,
             child: Center(
               child: Image.asset(
                 "assets/images/main_logo_new.png",
