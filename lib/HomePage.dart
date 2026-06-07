@@ -45,17 +45,18 @@ class HomePage extends StatelessWidget {
         children: [
           const SizedBox(height: 80),
 
+          // 🔥 メインロゴを最大化（flex: 2）
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Center(
               child: Image.asset(
                 "assets/images/main_logo_new.png",
                 fit: BoxFit.contain,
-                width: double.infinity,
               ),
             ),
           ),
 
+          // 🔥 ボタン部分（flex: 2）
           Expanded(
             flex: 2,
             child: Padding(
@@ -76,7 +77,7 @@ class HomePage extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ImagePage(
                                     title: "バス停を探す",
-                                    imagePath: "assets/images/heiyabu-rosen.jpg",
+                                    imagePath: "assets/images/heiyabu_rosen_V2.jpg",
                                   ),
                                 ),
                               );
@@ -163,6 +164,9 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  // 🔥 下段ボタンと footer_logo の間に隙間を追加
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -246,7 +250,7 @@ class ImagePage extends StatelessWidget {
       body: Center(
         child: InteractiveViewer(
           minScale: 0.5,
-          maxScale: 10.0, // ← 10倍ズーム
+          maxScale: 10.0,
           child: Image.asset(imagePath),
         ),
       ),
