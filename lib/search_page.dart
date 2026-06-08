@@ -227,7 +227,7 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: const Text('経路検索', style: TextStyle(fontSize: 20)),
+        title: const Text('経路・時刻表検索', style: TextStyle(fontSize: 20)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -260,7 +260,7 @@ class _SearchPageState extends State<SearchPage> {
               child: Text(arrive ?? '到着駅を選択'),
             ),
 
-            const SizedBox(height: 72), // ← ボタン1.5個分の間隔
+            const SizedBox(height: 72),
 
             ElevatedButton(
               style: buttonStyle,
