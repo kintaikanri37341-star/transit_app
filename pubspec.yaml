@@ -34,3 +34,8 @@ flutter:
     - assets/images/sachichan.jpg
     - assets/images/splash.png
 
+  fonts:
+    - family: NotoSansJP
+      fonts:
+        - asset: assets/fonts/NotoSansJP-Regular.ttf
+        - asset: assets/fonts/NotoSansJP-Bold.ttf

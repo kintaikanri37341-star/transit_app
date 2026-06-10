@@ -58,8 +58,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Transit App',
+
+      // ★ ここでアプリ全体のフォントを NotoSansJP に統一
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'NotoSansJP',   // ← これが最重要！
       ),
 
       home: const SplashPage(),
