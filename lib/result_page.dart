@@ -134,12 +134,15 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通（停留あり含む）カード：黒枠＋角丸＋影＋背景画像
+  // ★ 直通（停留あり含む）カード：車両色の枠線（赤 or 青）
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2), // ★ 黒枠
+        border: Border.all(
+          color: vehicleBorderColor(vehicle), // ★ 舞＝赤、幸＝青
+          width: 3,
+        ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -198,7 +201,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード：黒枠＋角丸＋影＋背景画像＋中央ラベル
+  // ★ 乗換カード：前半便・後半便それぞれ車両色の枠線
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -207,7 +210,7 @@ class _ResultPageState extends State<ResultPage> {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2), // ★ 外枠
+        border: Border.all(color: Colors.black, width: 2), // 外枠は黒
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -226,7 +229,7 @@ class _ResultPageState extends State<ResultPage> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: vehicleBorderColor(firstVehicle), // ★ 車両色の枠線
+                  color: vehicleBorderColor(firstVehicle),
                   width: 3,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -284,7 +287,7 @@ class _ResultPageState extends State<ResultPage> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: vehicleBorderColor(secondVehicle), // ★ 車両色の枠線
+                  color: vehicleBorderColor(secondVehicle),
                   width: 3,
                 ),
                 borderRadius: BorderRadius.circular(10),
