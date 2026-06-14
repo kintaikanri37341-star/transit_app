@@ -110,7 +110,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     final row = widget.row;
 
     return Scaffold(
-      backgroundColor: Colors.white, // ← 背景を真っ白に
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("${row['depart_station']} → ${row['arrive_station']}"),
         backgroundColor: Colors.white,
@@ -145,7 +145,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       );
     }
 
-    // ② 乗換（カード化）
+    // ② 乗換
     final vehicles = (row['vehicle'] as String).split("→");
     final firstVehicle = vehicles[0];
     final secondVehicle = vehicles[1];
@@ -239,7 +239,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     );
   }
 
-  /// 直通・停留あり直通
+  /// 直通・停留あり直通（完全修正版）
   List<Widget> _buildDirectStations(List edges) {
     if (edges.isEmpty) return [];
 
@@ -262,18 +262,29 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       // ★ 停留開始（学園通り駅→学園通り駅）
       if (e['depart_station'] == '学園通り駅' &&
           e['arrive_station'] == '学園通り駅') {
+        // 停留前の「学園通り駅 発」を削除
+        if (items.isNotEmpty) {
+          final last = items.last;
+          if (last['station'] == '学園通り駅' && last['label'] == '発') {
+            items.removeLast();
+          }
+        }
+
         items.add({
           'station': '学園通り駅',
           'time': e['depart_time'],
           'label': '停留開始',
           'isStopover': true,
         });
+
         afterStopover = true;
         i++;
         continue;
       }
 
-      // ★ 停留終了 → 通常の発行をスキップ（ここが今回の修正）
+      final isLast = (i == edges.length - 1);
+
+      // ★ 停留終了直後の「学園通り駅 発」
       if (afterStopover && e['depart_station'] == '学園通り駅') {
         items.add({
           'station': '学園通り駅',
@@ -282,11 +293,10 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
           'isStopover': false,
         });
         afterStopover = false;
-        i++;
-        continue; // ← ★ これを追加したことで余計な「発」が出なくなる
+        // ← continue しない。到着駅も追加するために fall-through する
       }
 
-      final isLast = (i == edges.length - 1);
+      // ★ 通常の到着駅追加（停留後1つ目の駅もここで必ず追加される）
       items.add({
         'station': e['arrive_station'],
         'time': e['arrive_time'],
@@ -357,7 +367,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     });
   }
 
-  /// タイムライン行（中央揃え・駅名2行・停留背景色・Pアイコン）
+  /// タイムライン行
   Widget _stationRow({
     required String station,
     required String time,
