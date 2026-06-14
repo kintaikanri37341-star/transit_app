@@ -98,7 +98,6 @@ class _SearchPageState extends State<SearchPage> {
                       label: const SizedBox.shrink(),
                     ),
                   ),
-
                   TextField(
                     controller: controller,
                     style: const TextStyle(fontSize: 20),
@@ -128,9 +127,7 @@ class _SearchPageState extends State<SearchPage> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   if (recentStations.isNotEmpty) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
@@ -142,7 +139,6 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                       ),
                     ),
-
                     ...recentStations.map((station) => ListTile(
                           leading: const Icon(Icons.history),
                           title: Text(
@@ -171,10 +167,8 @@ class _SearchPageState extends State<SearchPage> {
                             Navigator.pop(context);
                           },
                         )),
-
                     const Divider(),
                   ],
-
                   Expanded(
                     child: ListView.builder(
                       itemCount: tempList.length,
@@ -249,7 +243,6 @@ class _SearchPageState extends State<SearchPage> {
             ),
           );
 
-    // ★ 小型入替ボタンの共通スタイル
     final swapMiniButton = ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFFF59D),
       foregroundColor: Colors.black,
@@ -274,72 +267,69 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              '出発駅',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-
-            // ★ 出発駅ボタン + 右端ミニ入替
+            // 🔁 出発・到着と入替ボタンを横並びにして、
+            // 入替ボタンを上下の真ん中に 1 個だけ置く
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // 左側：出発・到着のラベル＋ボタンを縦に
                 Expanded(
-                  child: ElevatedButton(
-                    style: baseButton.copyWith(
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
-                    ),
-                    onPressed: () => openStationSelector(true),
-                    child: Text(depart ?? '出発駅を選択'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  style: swapMiniButton,
-                  onPressed: _swapStations,
-                  child: Row(
-                    children: const [
-                      Icon(Icons.swap_vert, size: 20, color: Colors.black),
-                      SizedBox(width: 4),
-                      Text("入替"),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        '出発駅',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      ElevatedButton(
+                        style: baseButton.copyWith(
+                          backgroundColor: const MaterialStatePropertyAll(
+                              Color(0xFFC8E6C9)),
+                        ),
+                        onPressed: () => openStationSelector(true),
+                        child: Text(depart ?? '出発駅を選択'),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        '到着駅',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      ElevatedButton(
+                        style: baseButton.copyWith(
+                          backgroundColor: const MaterialStatePropertyAll(
+                              Color(0xFFC8E6C9)),
+                        ),
+                        onPressed: () => openStationSelector(false),
+                        child: Text(arrive ?? '到着駅を選択'),
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
 
-            const SizedBox(height: 24),
-
-            const Text(
-              '到着駅',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-
-            // ★ 到着駅ボタン + 右端ミニ入替
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: baseButton.copyWith(
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
-                    ),
-                    onPressed: () => openStationSelector(false),
-                    child: Text(arrive ?? '到着駅を選択'),
-                  ),
-                ),
                 const SizedBox(width: 8),
-                ElevatedButton(
-                  style: swapMiniButton,
-                  onPressed: _swapStations,
-                  child: Row(
-                    children: const [
-                      Icon(Icons.swap_vert, size: 20, color: Colors.black),
-                      SizedBox(width: 4),
-                      Text("入替"),
-                    ],
-                  ),
+
+                // 右側：上下の真ん中に 1 個だけ入替ボタン
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: swapMiniButton,
+                      onPressed: _swapStations,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.swap_vert,
+                              size: 20, color: Colors.black),
+                          SizedBox(width: 4),
+                          Text("入替"),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
