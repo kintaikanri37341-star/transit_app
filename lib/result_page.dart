@@ -55,11 +55,13 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ 車両ごとの枠線色
   Color vehicleBorderColor(String vehicle) {
-    if (vehicle.contains("舞")) return const Color(0xFFC62828);
-    return const Color(0xFF1565C0);
+    if (vehicle.contains("舞")) return const Color(0xFFC62828); // 濃い赤
+    return const Color(0xFF1565C0); // 濃い青
   }
 
+  // ★ route_type → 表示ラベル
   String routeLabel(String routeType, String vehicle) {
     switch (routeType) {
       case "direct":
@@ -76,6 +78,7 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ middleLabel（2レグの真ん中に表示するラベル）
   String middleLabel(String routeType) {
     switch (routeType) {
       case "midday":
@@ -131,15 +134,12 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通カード（変更なし）
+  // ★ 直通（停留あり含む）カード：黒枠＋角丸＋影＋背景画像
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: vehicleBorderColor(vehicle),
-          width: 3,
-        ),
+        border: Border.all(color: Colors.black, width: 2), // ★ 黒枠
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -179,6 +179,8 @@ class _ResultPageState extends State<ResultPage> {
                   color: Colors.black,
                 ),
               ),
+
+              // ★ 停留あり直通は P アイコン
               if (routeType == "direct_stopover")
                 const Padding(
                   padding: EdgeInsets.only(left: 6),
@@ -196,7 +198,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（壊れない完全版）
+  // ★ 乗換カード：黒枠＋角丸＋影＋背景画像＋中央ラベル
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -204,10 +206,8 @@ class _ResultPageState extends State<ResultPage> {
     final secondVehicle = parts[1];
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 1), // ★ これが壊れないための必須要素
-      padding: const EdgeInsets.all(16),               // ★ 直通と揃える
       decoration: BoxDecoration(
-        color: Colors.white,                           // ★ 外側カードは残す（壊れないため）
+        border: Border.all(color: Colors.black, width: 2), // ★ 外枠
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -216,19 +216,20 @@ class _ResultPageState extends State<ResultPage> {
             offset: const Offset(2, 2),
           ),
         ],
+        color: Colors.white,
       ),
+      padding: const EdgeInsets.all(12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便
+          // ★ 前半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: vehicleBorderColor(firstVehicle),
+                  color: vehicleBorderColor(firstVehicle), // ★ 車両色の枠線
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(firstVehicle)),
                   fit: BoxFit.cover,
@@ -238,7 +239,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -260,9 +261,8 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 中央ラベル
+          // ★ 中央ラベル（乗換）
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
               const SizedBox(height: 4),
@@ -279,15 +279,15 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 後半便
+          // ★ 後半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: vehicleBorderColor(secondVehicle),
+                  color: vehicleBorderColor(secondVehicle), // ★ 車両色の枠線
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(secondVehicle)),
                   fit: BoxFit.cover,
@@ -297,7 +297,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
