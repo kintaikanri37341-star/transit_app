@@ -203,9 +203,9 @@ class _ResultPageState extends State<ResultPage> {
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    // ★ 外側の白カードの装飾だけ削除（黒枠・影・padding）
+    // ★ 外側の白カードの装飾（黒枠・影・padding）を削除
+    // ★ Container 自体は残す（高さ確保のため）
     return Container(
-      // ← 高さ確保のためだけに残す
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
