@@ -96,6 +96,7 @@ class _ResultPageState extends State<ResultPage> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
+              padding: const EdgeInsets.all(12),
               itemCount: results.length,
               itemBuilder: (context, index) {
                 final row = results[index];
@@ -115,12 +116,7 @@ class _ResultPageState extends State<ResultPage> {
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    margin: const EdgeInsets.only(bottom: 16),
                     child: isDirectType
                         ? _buildDirectCard(row, vehicle, routeType)
                         : _buildMultiLegCard(row, vehicle, routeType),
@@ -131,21 +127,31 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ 直通（停留あり含む）カード
+  // ============================================================
+  // ★ 直通（停留あり含む）カード：黒枠＋角丸＋影＋背景画像
+  // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 2), // ★ 黒枠
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(2, 2),
+          ),
+        ],
         image: DecorationImage(
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.6),
+            Colors.white.withOpacity(0.7),
             BlendMode.srcATop,
           ),
         ),
-        borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -153,131 +159,151 @@ class _ResultPageState extends State<ResultPage> {
             "${formatTime(row['depart_time'])} → ${formatTime(row['arrive_time'])}",
             style: const TextStyle(
               fontSize: 22,
-              color: Colors.black,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            routeLabel(routeType, vehicle),
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-            ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                routeLabel(routeType, vehicle),
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+              ),
+
+              // ★ 停留あり直通は P アイコン
+              if (routeType == "direct_stopover")
+                const Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Icon(
+                    Icons.local_parking,
+                    color: Colors.orange,
+                    size: 26,
+                  ),
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  // ★ 乗換・昼休み・遠回りカード（2レグ構成）
+  // ============================================================
+  // ★ 乗換カード：黒枠＋角丸＋影＋背景画像＋中央ラベル
+  // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    return Row(
-      children: [
-        // 前半便
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(bgImage(firstVehicle)),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.white.withOpacity(0.6),
-                  BlendMode.srcATop,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 2), // ★ 黒枠
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(2, 2),
+          ),
+        ],
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          // 前半便
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: AssetImage(bgImage(firstVehicle)),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.white.withOpacity(0.7),
+                    BlendMode.srcATop,
+                  ),
                 ),
               ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  firstVehicle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
+                  Text(
+                    firstVehicle,
+                    style: const TextStyle(fontSize: 16),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
 
-        const SizedBox(width: 6),
+          const SizedBox(width: 8),
 
-        // 真ん中のラベル
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade400),
-          ),
-          child: Text(
-            middleLabel(routeType),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 6),
-
-        // 後半便
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(bgImage(secondVehicle)),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.white.withOpacity(0.6),
-                  BlendMode.srcATop,
+          // 中央ラベル（乗換）
+          Column(
+            children: [
+              const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
+              const SizedBox(height: 4),
+              Text(
+                middleLabel(routeType),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+            ],
+          ),
+
+          const SizedBox(width: 8),
+
+          // 後半便
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: AssetImage(bgImage(secondVehicle)),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.white.withOpacity(0.7),
+                    BlendMode.srcATop,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  secondVehicle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    secondVehicle,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

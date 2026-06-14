@@ -39,3 +39,4 @@ flutter:
       fonts:
         - asset: assets/fonts/NotoSansJP-Regular.ttf
         - asset: assets/fonts/NotoSansJP-Bold.ttf
+        - asset: assets/fonts/NotoSansJP-Medium.ttf

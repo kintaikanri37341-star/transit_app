@@ -138,12 +138,13 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
           ),
         ),
         child: ListView(
+          padding: const EdgeInsets.all(12),
           children: _buildDirectStations(details),
         ),
       );
     }
 
-    // ② 乗換
+    // ② 乗換（カード化）
     final vehicles = (row['vehicle'] as String).split("→");
     final firstVehicle = vehicles[0];
     final secondVehicle = vehicles[1];
@@ -159,54 +160,78 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       ..sort((a, b) => (a['seq'] as int).compareTo(b['seq'] as int));
 
     return ListView(
+      padding: const EdgeInsets.all(12),
       children: [
-        // 前半便
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(bgImage(firstVehicle)),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.white.withOpacity(0.7),
-                BlendMode.srcATop,
-              ),
-            ),
+        Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            children: _buildTransferStations(firstLeg, isFirstLeg: true),
-          ),
-        ),
-
-        // 中央ラベル
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Center(
-            child: Text(
-              middleLabel(type),
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+            children: [
+              // 前半便
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(bgImage(firstVehicle)),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.white.withOpacity(0.7),
+                      BlendMode.srcATop,
+                    ),
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                ),
+                child: Column(
+                  children:
+                      _buildTransferStations(firstLeg, isFirstLeg: true),
+                ),
               ),
-            ),
-          ),
-        ),
 
-        // 後半便
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(bgImage(secondVehicle)),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.white.withOpacity(0.7),
-                BlendMode.srcATop,
+              // 乗換ラベル
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.swap_horiz,
+                        size: 28, color: Colors.black),
+                    const SizedBox(width: 8),
+                    Text(
+                      middleLabel(type),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          child: Column(
-            children: _buildTransferStations(secondLeg, isFirstLeg: false),
+
+              // 後半便
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(bgImage(secondVehicle)),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.white.withOpacity(0.7),
+                      BlendMode.srcATop,
+                    ),
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(12),
+                  ),
+                ),
+                child: Column(
+                  children:
+                      _buildTransferStations(secondLeg, isFirstLeg: false),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -217,159 +242,157 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
   List<Widget> _buildDirectStations(List edges) {
     if (edges.isEmpty) return [];
 
-    // まず「行データ」を組み立てる
-    final List<Map<String, String>> items = [];
+    final List<Map<String, dynamic>> items = [];
 
     final first = edges.first;
     items.add({
-      'station': first['depart_station'] as String,
-      'time': first['depart_time'] as String,
+      'station': first['depart_station'],
+      'time': first['depart_time'],
       'label': '発',
+      'isStopover': false,
     });
 
     bool afterStopover = false;
     int i = 0;
+
     while (i < edges.length) {
       final e = edges[i];
 
+      // ★ 停留開始（学園通り駅→学園通り駅）
       if (e['depart_station'] == '学園通り駅' &&
           e['arrive_station'] == '学園通り駅') {
         items.add({
           'station': '学園通り駅',
-          'time': e['depart_time'] as String,
+          'time': e['depart_time'],
           'label': '停留開始',
+          'isStopover': true, // ★ 背景色＋Pアイコン
         });
         afterStopover = true;
-        i += 1;
+        i++;
         continue;
       }
 
+      // ★ 停留終了は UI に表示しない（通常の発として扱う）
       if (afterStopover && e['depart_station'] == '学園通り駅') {
         items.add({
           'station': '学園通り駅',
-          'time': e['depart_time'] as String,
+          'time': e['depart_time'],
           'label': '発',
+          'isStopover': false,
         });
         afterStopover = false;
       }
 
-      final isLastEdge = (i == edges.length - 1);
+      final isLast = (i == edges.length - 1);
       items.add({
-        'station': e['arrive_station'] as String,
-        'time': e['arrive_time'] as String,
-        'label': isLastEdge ? '着' : '発',
+        'station': e['arrive_station'],
+        'time': e['arrive_time'],
+        'label': isLast ? '着' : '発',
+        'isStopover': false,
       });
 
-      i += 1;
+      i++;
     }
 
-    // 行データから、isFirst / isLast を付けて描画
-    final List<Widget> rows = [];
-    for (var idx = 0; idx < items.length; idx++) {
+    return List.generate(items.length, (idx) {
       final d = items[idx];
-      rows.add(_stationRow(
-        station: d['station']!,
-        time: d['time']!,
-        label: d['label']!,
+      return _stationRow(
+        station: d['station'],
+        time: d['time'],
+        label: d['label'],
         isFirst: idx == 0,
         isLast: idx == items.length - 1,
-      ));
-    }
-    return rows;
+        isStopover: d['isStopover'],
+      );
+    });
   }
 
   /// 乗換 / 昼休み / 遠回り
-  List<Widget> _buildTransferStations(List edges, {required bool isFirstLeg}) {
+  List<Widget> _buildTransferStations(List edges,
+      {required bool isFirstLeg}) {
     if (edges.isEmpty) return [];
 
-    final filtered = isFirstLeg
-        ? edges.where((e) {
-            final dep = e['depart_station'];
-            final arr = e['arrive_station'];
-            return !(dep == '学園通り駅' && arr == '学園通り駅');
-          }).toList()
-        : edges;
+    // transfer では停留は出ないが、安全側でフィルタ
+    final filtered = edges.where((e) {
+      final dep = e['depart_station'];
+      final arr = e['arrive_station'];
+      return !(dep == '学園通り駅' && arr == '学園通り駅');
+    }).toList();
 
     if (filtered.isEmpty) return [];
 
-    final List<Map<String, String>> items = [];
+    final List<Map<String, dynamic>> items = [];
 
     final first = filtered.first;
     items.add({
-      'station': first['depart_station'] as String,
-      'time': first['depart_time'] as String,
+      'station': first['depart_station'],
+      'time': first['depart_time'],
       'label': '発',
+      'isStopover': false,
     });
 
     for (var i = 0; i < filtered.length; i++) {
       final e = filtered[i];
-      final isLastEdge = (i == filtered.length - 1);
+      final isLast = (i == filtered.length - 1);
       items.add({
-        'station': e['arrive_station'] as String,
-        'time': e['arrive_time'] as String,
-        'label': isLastEdge ? '着' : '発',
+        'station': e['arrive_station'],
+        'time': e['arrive_time'],
+        'label': isLast ? '着' : '発',
+        'isStopover': false,
       });
     }
 
-    final List<Widget> rows = [];
-    for (var idx = 0; idx < items.length; idx++) {
+    return List.generate(items.length, (idx) {
       final d = items[idx];
-      rows.add(_stationRow(
-        station: d['station']!,
-        time: d['time']!,
-        label: d['label']!,
+      return _stationRow(
+        station: d['station'],
+        time: d['time'],
+        label: d['label'],
         isFirst: idx == 0,
         isLast: idx == items.length - 1,
-      ));
-    }
-    return rows;
+        isStopover: d['isStopover'],
+      );
+    });
   }
 
-  /// タイムライン風：左に黒い縦線＋白丸
+  /// タイムライン行（行間拡大・駅名2行・停留背景色・Pアイコン）
   Widget _stationRow({
     required String station,
     required String time,
     required String label,
     required bool isFirst,
     required bool isLast,
+    required bool isStopover,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: isStopover ? const Color(0xFFFFF7CC) : Colors.transparent,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 左側の縦線＋白丸
+          // 左のタイムライン
           SizedBox(
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 56,
             child: Stack(
               children: [
-                // 上方向の線（出発行には描かない）
                 if (!isFirst)
                   Align(
                     alignment: Alignment.topCenter,
-                    child: Container(
-                      width: 2,
-                      height: 20,
-                      color: Colors.black,
-                    ),
+                    child: Container(width: 2, height: 28, color: Colors.black),
                   ),
-                // 下方向の線（到着行には描かない）
                 if (!isLast)
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: Container(
-                      width: 2,
-                      height: 20,
-                      color: Colors.black,
-                    ),
+                    child: Container(width: 2, height: 28, color: Colors.black),
                   ),
-                // 白丸
                 Align(
                   alignment: Alignment.center,
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: 20,
+                    height: 20,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.black, width: 2),
@@ -381,36 +404,44 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
             ),
           ),
 
-          // 駅名＋時刻（駅名は長いときだけ自動縮小）
+          // 駅名＋時刻＋停留アイコン
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 駅名：左寄せで、必要なときだけ縮小して全体表示
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        station,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                        ),
+                  Flexible(
+                    child: Text(
+                      station,
+                      softWrap: true,
+                      maxLines: 2,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        height: 1.3,
                       ),
                     ),
                   ),
-
-                  const SizedBox(width: 8),
-
-                  // 時刻：右側に固定、絶対に潰れない
-                  Text(
-                    "${formatTime(time)}$label",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        "${formatTime(time)}$label",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (isStopover)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 6),
+                          child: Icon(
+                            Icons.local_parking,
+                            color: Colors.orange,
+                            size: 26,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
