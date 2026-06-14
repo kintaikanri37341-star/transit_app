@@ -265,7 +265,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
           'station': '学園通り駅',
           'time': e['depart_time'],
           'label': '停留開始',
-          'isStopover': true, // ★ 背景色＋Pアイコン
+          'isStopover': true,
         });
         afterStopover = true;
         i++;
@@ -312,7 +312,6 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       {required bool isFirstLeg}) {
     if (edges.isEmpty) return [];
 
-    // transfer では停留は出ないが、安全側でフィルタ
     final filtered = edges.where((e) {
       final dep = e['depart_station'];
       final arr = e['arrive_station'];
@@ -355,7 +354,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     });
   }
 
-  /// タイムライン行（行間拡大・駅名2行・停留背景色・Pアイコン）
+  /// タイムライン行（中央揃え・駅名2行・停留背景色・Pアイコン）
   Widget _stationRow({
     required String station,
     required String time,
@@ -370,12 +369,12 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
         color: isStopover ? const Color(0xFFFFF7CC) : Colors.transparent,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center, // ★ 中央揃え
         children: [
           // 左のタイムライン
           SizedBox(
             width: 48,
-            height: 56,
+            height: 56, // ★ 中央揃えの基準
             child: Stack(
               children: [
                 if (!isFirst)
@@ -404,11 +403,12 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
             ),
           ),
 
-          // 駅名＋時刻＋停留アイコン
+          // 駅名＋時刻
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center, // ★ 中央揃え
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
@@ -432,6 +432,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+
                       if (isStopover)
                         const Padding(
                           padding: EdgeInsets.only(left: 6),

@@ -55,6 +55,12 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ 車両ごとの枠線色
+  Color vehicleBorderColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFC62828); // 濃い赤
+    return const Color(0xFF1565C0); // 濃い青
+  }
+
   // ★ route_type → 表示ラベル
   String routeLabel(String routeType, String vehicle) {
     switch (routeType) {
@@ -201,7 +207,7 @@ class _ResultPageState extends State<ResultPage> {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2), // ★ 黒枠
+        border: Border.all(color: Colors.black, width: 2), // ★ 外枠
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -215,10 +221,14 @@ class _ResultPageState extends State<ResultPage> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          // 前半便
+          // ★ 前半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
+                border: Border.all(
+                  color: vehicleBorderColor(firstVehicle), // ★ 車両色の枠線
+                  width: 3,
+                ),
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(firstVehicle)),
@@ -251,7 +261,7 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // 中央ラベル（乗換）
+          // ★ 中央ラベル（乗換）
           Column(
             children: [
               const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
@@ -269,10 +279,14 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // 後半便
+          // ★ 後半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
+                border: Border.all(
+                  color: vehicleBorderColor(secondVehicle), // ★ 車両色の枠線
+                  width: 3,
+                ),
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(secondVehicle)),
