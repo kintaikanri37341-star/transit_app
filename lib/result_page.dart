@@ -120,7 +120,7 @@ class _ResultPageState extends State<ResultPage> {
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 24),
+                    margin: const EdgeInsets.only(bottom: 24), // ★ ここだけが「カード間隔」
                     child: isDirectType
                         ? _buildDirectCard(row, vehicle, routeType)
                         : _buildMultiLegCard(row, vehicle, routeType),
@@ -197,20 +197,31 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（完全修正版）
+  // ★ 乗換カード（直通と同じ構造に揃えた版）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    // ★ 外側の Container は高さ確保のためだけに残す
-    //    decoration（白背景・影）と padding は削除
     return Container(
+      // ★ 直通カードと同じ「外側の1枚のカード」
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(2, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16), // ★ 直通と同じ
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便（赤/青枠が外枠になる）
+          // ★ 前半便（カード内の左ブロック）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -218,7 +229,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(firstVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(firstVehicle)),
                   fit: BoxFit.cover,
@@ -228,7 +239,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ★ 直通と同じ
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -237,11 +248,15 @@ class _ResultPageState extends State<ResultPage> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      height: 1.2,
                     ),
                   ),
                   Text(
                     firstVehicle,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.2,
+                    ),
                   ),
                 ],
               ),
@@ -250,26 +265,37 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 中央の乗換ラベル（外枠なし）
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
-              const SizedBox(height: 4),
-              Text(
-                middleLabel(routeType),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          // ★ 中央の乗換ラベル（カード内の中央ブロック）
+          Container(
+            width: 70,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Color(0xFFCCCCCC), width: 1),
+                bottom: BorderSide(color: Color(0xFFCCCCCC), width: 1),
               ),
-            ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
+                const SizedBox(height: 4),
+                Text(
+                  middleLabel(routeType),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(width: 8),
 
-          // ★ 後半便（赤/青枠が外枠になる）
+          // ★ 後半便（カード内の右ブロック）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -277,7 +303,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(secondVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(secondVehicle)),
                   fit: BoxFit.cover,
@@ -287,7 +313,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ★ 直通と同じ
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -296,11 +322,15 @@ class _ResultPageState extends State<ResultPage> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      height: 1.2,
                     ),
                   ),
                   Text(
                     secondVehicle,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.2,
+                    ),
                   ),
                 ],
               ),
