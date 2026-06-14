@@ -229,19 +229,18 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
 
-    // ★ 検索ボタンの色を条件で変える
     final searchButtonStyle = (depart != null && arrive != null)
         ? ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF8BBD0), // 薄ピンク
+            backgroundColor: const Color(0xFFF8BBD0),
             foregroundColor: Colors.black,
-            side: const BorderSide(color: Color(0xFFC62828), width: 3), // 濃い赤枠
+            side: const BorderSide(color: Color(0xFFC62828), width: 3),
             textStyle: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           )
         : ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFC8E6C9), // 元の薄緑
+            backgroundColor: const Color(0xFFC8E6C9),
             foregroundColor: Colors.black,
             side: const BorderSide(color: Colors.black, width: 2),
             textStyle: const TextStyle(
@@ -249,6 +248,19 @@ class _SearchPageState extends State<SearchPage> {
               fontWeight: FontWeight.bold,
             ),
           );
+
+    // ★ 小型入替ボタンの共通スタイル
+    final swapMiniButton = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFFFF59D),
+      foregroundColor: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      minimumSize: const Size(60, 40),
+      side: const BorderSide(color: Colors.black, width: 2),
+      textStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -268,13 +280,32 @@ class _SearchPageState extends State<SearchPage> {
             ),
             const SizedBox(height: 4),
 
-            ElevatedButton(
-              style: baseButton.copyWith(
-                backgroundColor:
-                    const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
-              ),
-              onPressed: () => openStationSelector(true),
-              child: Text(depart ?? '出発駅を選択'),
+            // ★ 出発駅ボタン + 右端ミニ入替
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: baseButton.copyWith(
+                      backgroundColor:
+                          const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
+                    ),
+                    onPressed: () => openStationSelector(true),
+                    child: Text(depart ?? '出発駅を選択'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  style: swapMiniButton,
+                  onPressed: _swapStations,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.swap_vert, size: 20, color: Colors.black),
+                      SizedBox(width: 4),
+                      Text("入替"),
+                    ],
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 24),
@@ -285,18 +316,36 @@ class _SearchPageState extends State<SearchPage> {
             ),
             const SizedBox(height: 4),
 
-            ElevatedButton(
-              style: baseButton.copyWith(
-                backgroundColor:
-                    const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
-              ),
-              onPressed: () => openStationSelector(false),
-              child: Text(arrive ?? '到着駅を選択'),
+            // ★ 到着駅ボタン + 右端ミニ入替
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: baseButton.copyWith(
+                      backgroundColor:
+                          const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
+                    ),
+                    onPressed: () => openStationSelector(false),
+                    child: Text(arrive ?? '到着駅を選択'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  style: swapMiniButton,
+                  onPressed: _swapStations,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.swap_vert, size: 20, color: Colors.black),
+                      SizedBox(width: 4),
+                      Text("入替"),
+                    ],
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 40),
 
-            // ★ 検索ボタン（虫眼鏡アイコン付き）
             ElevatedButton(
               style: searchButtonStyle,
               onPressed: (depart != null && arrive != null)
@@ -323,28 +372,6 @@ class _SearchPageState extends State<SearchPage> {
             ),
 
             const SizedBox(height: 40),
-
-            // 🔄 入れ替えボタン（アイコン付き）
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFF59D),
-                foregroundColor: Colors.black,
-                side: const BorderSide(color: Colors.black, width: 2),
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onPressed: _swapStations,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.swap_vert, size: 28, color: Colors.black),
-                  SizedBox(width: 8),
-                  Text("出発・到着駅を入れ替える"),
-                ],
-              ),
-            ),
 
             Expanded(
               child: Center(
