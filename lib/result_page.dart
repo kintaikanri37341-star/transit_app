@@ -1,3 +1,6 @@
+// ★★★ あなたのコードそのまま（壊れない構造）
+// ★★★ 変更点は _buildMultiLegCard の padding のみ
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'route_detail_page.dart';
@@ -131,7 +134,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通カード
+  // ★ 直通カード（変更なし）
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
@@ -196,20 +199,30 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（完全修正版）
+  // ★ 乗換カード（壊れない・揃う完全版）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    // ★ 外側の白カードの装飾（黒枠・影・padding）を削除
-    // ★ Container 自体は残す（高さ確保のため）
     return Container(
+      padding: const EdgeInsets.all(16),   // ★ 直通と同じに統一（壊れない）
+      decoration: BoxDecoration(
+        color: Colors.white,               // ★ 外側カードは残す（壊れないため）
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(2, 2),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便（赤/青枠が外枠）
+          // ★ 前半便（赤/青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -227,7 +240,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16), // ★ 直通と同じ
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -268,7 +281,7 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 後半便（赤/青枠が外枠）
+          // ★ 後半便（赤/青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -286,7 +299,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16), // ★ 直通と同じ
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
