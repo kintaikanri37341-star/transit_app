@@ -131,7 +131,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通カード（変更なし）
+  // ★ 直通カード
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
@@ -196,7 +196,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（壊れない完全版）
+  // ★ 乗換カード（あなたが貼った正常版そのまま）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -204,10 +204,8 @@ class _ResultPageState extends State<ResultPage> {
     final secondVehicle = parts[1];
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 1), // ★ これが壊れないための必須要素
-      padding: const EdgeInsets.all(16),               // ★ 直通と揃える
       decoration: BoxDecoration(
-        color: Colors.white,                           // ★ 外側カードは残す（壊れないため）
+        border: Border.all(color: Colors.black, width: 2), // ★あなたの元コードそのまま
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -216,9 +214,10 @@ class _ResultPageState extends State<ResultPage> {
             offset: const Offset(2, 2),
           ),
         ],
+        color: Colors.white,
       ),
+      padding: const EdgeInsets.all(12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ★ 前半便
           Expanded(
@@ -228,7 +227,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(firstVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(firstVehicle)),
                   fit: BoxFit.cover,
@@ -238,7 +237,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -262,7 +261,6 @@ class _ResultPageState extends State<ResultPage> {
 
           // ★ 中央ラベル
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
               const SizedBox(height: 4),
@@ -287,7 +285,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(secondVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(secondVehicle)),
                   fit: BoxFit.cover,
@@ -297,7 +295,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
