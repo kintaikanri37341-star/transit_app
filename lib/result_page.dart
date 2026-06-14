@@ -200,7 +200,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード：黒枠＋白背景＋縦一列レイアウトでスッキリ表示
+  // ★ 乗換カード：黒枠＋白背景＋3行構成でスッキリ表示
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -210,6 +210,7 @@ class _ResultPageState extends State<ResultPage> {
     final firstColor = vehicleBorderColor(firstVehicle);
     final secondColor = vehicleBorderColor(secondVehicle);
 
+    // ●色タグ（車両名の右側）
     Widget colorDot(Color c) => Container(
           width: 12,
           height: 12,
@@ -236,70 +237,52 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 前半便
+          // ① 前半便（1行）
           Row(
             children: [
               Text(
-                "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
+                "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}　$firstVehicle",
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 22, // ★ 直通カードと同じ
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              colorDot(firstColor),
               const SizedBox(width: 6),
-              Text(
-                firstVehicle,
-                style: const TextStyle(fontSize: 16),
-              ),
+              colorDot(firstColor), // ★ 車両名の右に色タグ
             ],
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
 
-          // 乗換表示（縦の流れの中に小さく）
+          // ② 乗換（駅名入り）
           Row(
             children: [
               const Icon(Icons.arrow_downward, size: 20, color: Colors.black),
               const SizedBox(width: 4),
               Text(
-                middleLabel(routeType), // 「乗換」や「昼休憩後出発」など
+                "乗換（${row['transfer_station']}）",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
 
-          // 後半便
+          // ③ 後半便（1行）
           Row(
             children: [
               Text(
-                "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
+                "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}　$secondVehicle",
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 22, // ★ 直通カードと同じ
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              colorDot(secondColor),
               const SizedBox(width: 6),
-              Text(
-                secondVehicle,
-                style: const TextStyle(fontSize: 16),
-              ),
+              colorDot(secondColor), // ★ 車両名の右に色タグ
             ],
           ),
         ],
