@@ -91,7 +91,7 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,   // ★ ① 背景を真っ白に
+      backgroundColor: Colors.white,   // ★ 背景を真っ白に
       appBar: AppBar(
         title: Text("${widget.depart} → ${widget.arrive}"),
         backgroundColor: Colors.white,
@@ -120,7 +120,7 @@ class _ResultPageState extends State<ResultPage> {
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 24), // ★ ③ カード間隔を広げる
+                    margin: const EdgeInsets.only(bottom: 24), // ★ カード間隔を広げた
                     child: isDirectType
                         ? _buildDirectCard(row, vehicle, routeType)
                         : _buildMultiLegCard(row, vehicle, routeType),
@@ -197,21 +197,21 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（今回の修正ポイント）
+  // ★ 乗換カード（外枠削除・左右端まで枠拡張・白背景）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    return IntrinsicHeight( // ★ ② 枠の縦幅をカード全体に揃える
+    return IntrinsicHeight(
       child: Container(
-        color: Colors.white, // ★ ③ 枠外背景を真っ白に
-        padding: const EdgeInsets.all(12),
+        color: Colors.white, // ★ 枠外背景を真っ白に
+        padding: const EdgeInsets.symmetric(vertical: 12), // ★ 左右余白を消す
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ★ 前半便（赤 or 青枠）
+            // ★ 前半便（左端まで枠を広げる）
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -251,7 +251,7 @@ class _ResultPageState extends State<ResultPage> {
 
             const SizedBox(width: 8),
 
-            // ★ 乗換アイコン
+            // ★ 乗換アイコン（中央）
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -270,7 +270,7 @@ class _ResultPageState extends State<ResultPage> {
 
             const SizedBox(width: 8),
 
-            // ★ 後半便（赤 or 青枠）
+            // ★ 後半便（右端まで枠を広げる）
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

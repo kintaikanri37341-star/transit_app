@@ -110,7 +110,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     final row = widget.row;
 
     return Scaffold(
-      backgroundColor: Colors.white, // ★ ここを追加しただけ（画面全体の背景を真っ白に）
+      backgroundColor: Colors.white, // ← 背景を真っ白に
       appBar: AppBar(
         title: Text("${row['depart_station']} → ${row['arrive_station']}"),
         backgroundColor: Colors.white,
@@ -273,7 +273,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
         continue;
       }
 
-      // ★ 停留終了は UI に表示しない（通常の発として扱う）
+      // ★ 停留終了 → 通常の発行をスキップ（ここが今回の修正）
       if (afterStopover && e['depart_station'] == '学園通り駅') {
         items.add({
           'station': '学園通り駅',
@@ -282,6 +282,8 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
           'isStopover': false,
         });
         afterStopover = false;
+        i++;
+        continue; // ← ★ これを追加したことで余計な「発」が出なくなる
       }
 
       final isLast = (i == edges.length - 1);
@@ -370,12 +372,11 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
         color: isStopover ? const Color(0xFFFFF7CC) : Colors.transparent,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center, // ★ 中央揃え
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 左のタイムライン
           SizedBox(
             width: 48,
-            height: 56, // ★ 中央揃えの基準
+            height: 56,
             child: Stack(
               children: [
                 if (!isFirst)
@@ -404,12 +405,11 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
             ),
           ),
 
-          // 駅名＋時刻
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center, // ★ 中央揃え
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
