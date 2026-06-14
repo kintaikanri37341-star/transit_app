@@ -220,8 +220,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFC8E6C9),
+    final baseButton = ElevatedButton.styleFrom(
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       textStyle: const TextStyle(
@@ -229,6 +228,27 @@ class _SearchPageState extends State<SearchPage> {
         fontWeight: FontWeight.bold,
       ),
     );
+
+    // ★ 検索ボタンの色を条件で変える
+    final searchButtonStyle = (depart != null && arrive != null)
+        ? ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFF8BBD0), // 薄ピンク
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Color(0xFFC62828), width: 3), // 濃い赤枠
+            textStyle: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+        : ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFC8E6C9), // 元の薄緑
+            foregroundColor: Colors.black,
+            side: const BorderSide(color: Colors.black, width: 2),
+            textStyle: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -249,7 +269,10 @@ class _SearchPageState extends State<SearchPage> {
             const SizedBox(height: 4),
 
             ElevatedButton(
-              style: buttonStyle,
+              style: baseButton.copyWith(
+                backgroundColor:
+                    const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
+              ),
               onPressed: () => openStationSelector(true),
               child: Text(depart ?? '出発駅を選択'),
             ),
@@ -263,15 +286,19 @@ class _SearchPageState extends State<SearchPage> {
             const SizedBox(height: 4),
 
             ElevatedButton(
-              style: buttonStyle,
+              style: baseButton.copyWith(
+                backgroundColor:
+                    const MaterialStatePropertyAll(Color(0xFFC8E6C9)),
+              ),
               onPressed: () => openStationSelector(false),
               child: Text(arrive ?? '到着駅を選択'),
             ),
 
             const SizedBox(height: 40),
 
+            // ★ 検索ボタン（虫眼鏡アイコン付き）
             ElevatedButton(
-              style: buttonStyle,
+              style: searchButtonStyle,
               onPressed: (depart != null && arrive != null)
                   ? () {
                       Navigator.push(
@@ -285,7 +312,14 @@ class _SearchPageState extends State<SearchPage> {
                       );
                     }
                   : null,
-              child: const Text('検索する'),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.search, size: 26, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text('検索する'),
+                ],
+              ),
             ),
 
             const SizedBox(height: 40),

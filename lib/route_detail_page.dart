@@ -110,6 +110,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     final row = widget.row;
 
     return Scaffold(
+      backgroundColor: Colors.white, // ★ ここを追加しただけ（画面全体の背景を真っ白に）
       appBar: AppBar(
         title: Text("${row['depart_station']} → ${row['arrive_station']}"),
         backgroundColor: Colors.white,
