@@ -196,7 +196,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（壊れない完全版）
+  // ★ 乗換カード（高さ揃う・フォントそのまま・壊れない完全版）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -204,10 +204,9 @@ class _ResultPageState extends State<ResultPage> {
     final secondVehicle = parts[1];
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 1), // ★ これが壊れないための必須要素
-      padding: const EdgeInsets.all(16),               // ★ 直通と揃える
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12), // ★ 外側余白を薄く
       decoration: BoxDecoration(
-        color: Colors.white,                           // ★ 外側カードは残す（壊れないため）
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -220,7 +219,7 @@ class _ResultPageState extends State<ResultPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便
+          // ★ 前半便（フォントそのまま）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -238,7 +237,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16), // ← 高齢者向けのまま
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -258,28 +257,28 @@ class _ResultPageState extends State<ResultPage> {
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
-          // ★ 中央ラベル
+          // ★ 中央ラベル（高さだけ縮める）
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
-              const SizedBox(height: 4),
+              const Icon(Icons.swap_horiz, size: 28, color: Colors.black), // ← サイズそのまま
               Text(
                 middleLabel(routeType),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 16,   // ← サイズそのまま
                   fontWeight: FontWeight.bold,
+                  height: 1.0,    // ← 行間だけ詰める
                 ),
               ),
             ],
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
-          // ★ 後半便
+          // ★ 後半便（フォントそのまま）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -297,7 +296,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16), // ← 高齢者向けのまま
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
