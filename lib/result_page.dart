@@ -196,7 +196,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（高さ揃う・フォントそのまま・壊れない完全版）
+  // ★ 乗換カード（高さ揃う・壊れない・フォントそのまま）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -204,6 +204,7 @@ class _ResultPageState extends State<ResultPage> {
     final secondVehicle = parts[1];
 
     return Container(
+      constraints: const BoxConstraints(minHeight: 1), // ★ 壊れ防止の決定打
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12), // ★ 外側余白を薄く
       decoration: BoxDecoration(
         color: Colors.white,
@@ -219,7 +220,7 @@ class _ResultPageState extends State<ResultPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便（フォントそのまま）
+          // ★ 前半便（フォント・padding そのまま）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -237,7 +238,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ← 高齢者向けのまま
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -263,14 +264,14 @@ class _ResultPageState extends State<ResultPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.swap_horiz, size: 28, color: Colors.black), // ← サイズそのまま
+              const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
               Text(
                 middleLabel(routeType),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 16,   // ← サイズそのまま
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  height: 1.0,    // ← 行間だけ詰める
+                  height: 1.0, // ← 行間だけ詰める（フォントはそのまま）
                 ),
               ),
             ],
@@ -278,7 +279,7 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 6),
 
-          // ★ 後半便（フォントそのまま）
+          // ★ 後半便（フォント・padding そのまま）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -296,7 +297,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ← 高齢者向けのまま
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
