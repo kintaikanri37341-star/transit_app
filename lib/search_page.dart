@@ -267,55 +267,52 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 🔁 出発・到着と入替ボタンを横並びにして、
-            // 入替ボタンを上下の真ん中に 1 個だけ置く
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // 左側：出発・到着のラベル＋ボタンを縦に
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        '出発駅',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      ElevatedButton(
-                        style: baseButton.copyWith(
-                          backgroundColor: const MaterialStatePropertyAll(
-                              Color(0xFFC8E6C9)),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ★ 左側は Expanded → ボタンが画面いっぱいに広がる
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          '出発駅',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        onPressed: () => openStationSelector(true),
-                        child: Text(depart ?? '出発駅を選択'),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        '到着駅',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      ElevatedButton(
-                        style: baseButton.copyWith(
-                          backgroundColor: const MaterialStatePropertyAll(
-                              Color(0xFFC8E6C9)),
+                        const SizedBox(height: 4),
+                        ElevatedButton(
+                          style: baseButton.copyWith(
+                            backgroundColor: const MaterialStatePropertyAll(
+                                Color(0xFFC8E6C9)),
+                          ),
+                          onPressed: () => openStationSelector(true),
+                          child: Text(depart ?? '出発駅を選択'),
                         ),
-                        onPressed: () => openStationSelector(false),
-                        child: Text(arrive ?? '到着駅を選択'),
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                        const Text(
+                          '到着駅',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        ElevatedButton(
+                          style: baseButton.copyWith(
+                            backgroundColor: const MaterialStatePropertyAll(
+                                Color(0xFFC8E6C9)),
+                          ),
+                          onPressed: () => openStationSelector(false),
+                          child: Text(arrive ?? '到着駅を選択'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-                // 右側：上下の真ん中に 1 個だけ入替ボタン
-                SizedBox(
-                  height: 160, // ← 出発駅ボタン＋到着駅ボタンの高さに合わせる
-                  child: Center(
+                  // ★ 右側：上下中央に入替ボタン1個
+                  Center(
                     child: ElevatedButton(
                       style: swapMiniButton,
                       onPressed: _swapStations,
@@ -330,8 +327,8 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 40),
