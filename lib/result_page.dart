@@ -196,7 +196,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（高さ揃う・壊れない・フォントそのまま）
+  // ★ 乗換カード（壊れない・高さ揃う・フォントそのまま）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
