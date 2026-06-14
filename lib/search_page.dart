@@ -243,16 +243,16 @@ class _SearchPageState extends State<SearchPage> {
             ),
           );
 
-    final swapMiniButton = ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFFF59D),
-      foregroundColor: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      minimumSize: const Size(60, 40),
-      side: const BorderSide(color: Colors.black, width: 2),
-      textStyle: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
+    final swapButton = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFFF59D),
+        foregroundColor: Colors.black,
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(14),
+        side: const BorderSide(color: Colors.black, width: 2),
       ),
+      onPressed: _swapStations,
+      child: const Icon(Icons.swap_vert, size: 28, color: Colors.black),
     );
 
     return Scaffold(
@@ -265,70 +265,53 @@ class _SearchPageState extends State<SearchPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ★ 左側は Expanded → ボタンが画面いっぱいに広がる
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          '出発駅',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        ElevatedButton(
-                          style: baseButton.copyWith(
-                            backgroundColor: const MaterialStatePropertyAll(
-                                Color(0xFFC8E6C9)),
-                          ),
-                          onPressed: () => openStationSelector(true),
-                          child: Text(depart ?? '出発駅を選択'),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          '到着駅',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        ElevatedButton(
-                          style: baseButton.copyWith(
-                            backgroundColor: const MaterialStatePropertyAll(
-                                Color(0xFFC8E6C9)),
-                          ),
-                          onPressed: () => openStationSelector(false),
-                          child: Text(arrive ?? '到着駅を選択'),
-                        ),
-                      ],
+            // ★ Stack で「ボタン2つ」と「入替ボタン」を重ねる
+            Stack(
+              children: [
+                // ★ 出発駅・到着駅（画面いっぱい）
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      '出発駅',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                  ),
-
-                  const SizedBox(width: 8),
-
-                  // ★ 右側：上下中央に入替ボタン1個
-                  Center(
-                    child: ElevatedButton(
-                      style: swapMiniButton,
-                      onPressed: _swapStations,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.swap_vert,
-                              size: 20, color: Colors.black),
-                          SizedBox(width: 4),
-                          Text("入替"),
-                        ],
+                    const SizedBox(height: 4),
+                    ElevatedButton(
+                      style: baseButton.copyWith(
+                        backgroundColor: const MaterialStatePropertyAll(
+                            Color(0xFFC8E6C9)),
                       ),
+                      onPressed: () => openStationSelector(true),
+                      child: Text(depart ?? '出発駅を選択'),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      '到着駅',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    ElevatedButton(
+                      style: baseButton.copyWith(
+                        backgroundColor: const MaterialStatePropertyAll(
+                            Color(0xFFC8E6C9)),
+                      ),
+                      onPressed: () => openStationSelector(false),
+                      child: Text(arrive ?? '到着駅を選択'),
+                    ),
+                  ],
+                ),
+
+                // ★ 入替ボタン（右端・上下中央）
+                Positioned(
+                  right: 0,
+                  top: 70, // ← 出発ボタンと到着ボタンの間に来る高さ
+                  child: swapButton,
+                ),
+              ],
             ),
 
             const SizedBox(height: 40),
@@ -355,35 +338,6 @@ class _SearchPageState extends State<SearchPage> {
                   SizedBox(width: 8),
                   Text('検索する'),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Text(
-                      '日曜日・祝日・年末年始は運休です。',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      '交通状況により、到着時間が遅れることがあります。',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'あらかじめご承知おきください。',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
