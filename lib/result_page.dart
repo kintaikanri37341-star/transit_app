@@ -197,7 +197,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（最新仕様すべて反映）
+  // ★ 乗換カード（高さ調整済み・最新仕様すべて反映）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -211,7 +211,7 @@ class _ResultPageState extends State<ResultPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ★ 前半便（左端まで枠を広げる）
+            // ★ 前半便（高さ調整）
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -229,7 +229,7 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
                 ),
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8), // ★ 10 → 8 に調整
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -238,18 +238,22 @@ class _ResultPageState extends State<ResultPage> {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        height: 1.2, // ★ 行間を少し詰める
                       ),
                     ),
                     Text(
                       firstVehicle,
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.2, // ★ 行間調整
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // ★ 中央の乗換ラベル（上下に薄い線を追加して一体化）
+            // ★ 中央の乗換ラベル（上下に薄い線）
             Container(
               width: 70,
               alignment: Alignment.center,
@@ -270,13 +274,14 @@ class _ResultPageState extends State<ResultPage> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      height: 1.2,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // ★ 後半便（右端まで枠を広げる）
+            // ★ 後半便（高さ調整）
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -294,7 +299,7 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
                 ),
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8), // ★ 10 → 8 に調整
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -303,11 +308,15 @@ class _ResultPageState extends State<ResultPage> {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        height: 1.2,
                       ),
                     ),
                     Text(
                       secondVehicle,
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.2,
+                      ),
                     ),
                   ],
                 ),
