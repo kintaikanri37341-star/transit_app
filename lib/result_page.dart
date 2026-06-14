@@ -55,13 +55,11 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  // ★ 車両ごとの枠線色
   Color vehicleBorderColor(String vehicle) {
-    if (vehicle.contains("舞")) return const Color(0xFFC62828); // 濃い赤
-    return const Color(0xFF1565C0); // 濃い青
+    if (vehicle.contains("舞")) return const Color(0xFFC62828);
+    return const Color(0xFF1565C0);
   }
 
-  // ★ route_type → 表示ラベル
   String routeLabel(String routeType, String vehicle) {
     switch (routeType) {
       case "direct":
@@ -78,7 +76,6 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  // ★ middleLabel（2レグの真ん中に表示するラベル）
   String middleLabel(String routeType) {
     switch (routeType) {
       case "midday":
@@ -134,13 +131,13 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通（停留あり含む）カード：車両色の枠線（赤 or 青）
+  // ★ 直通カード
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: vehicleBorderColor(vehicle), // ★ 舞＝赤、幸＝青
+          color: vehicleBorderColor(vehicle),
           width: 3,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -182,8 +179,6 @@ class _ResultPageState extends State<ResultPage> {
                   color: Colors.black,
                 ),
               ),
-
-              // ★ 停留あり直通は P アイコン
               if (routeType == "direct_stopover")
                 const Padding(
                   padding: EdgeInsets.only(left: 6),
@@ -201,126 +196,114 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード：前半便・後半便それぞれ車両色の枠線
+  // ★ 乗換カード（完全修正版）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2), // 外枠は黒
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 4,
-            offset: const Offset(2, 2),
-          ),
-        ],
-        color: Colors.white,
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // ★ 前半便（赤 or 青枠）
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: vehicleBorderColor(firstVehicle),
-                  width: 3,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: AssetImage(bgImage(firstVehicle)),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.white.withOpacity(0.7),
-                    BlendMode.srcATop,
-                  ),
-                ),
+    // ★ 外側の白いカードを完全に削除 → 直通と同じ構造へ
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ★ 前半便（赤/青枠が外枠）
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: vehicleBorderColor(firstVehicle),
+                width: 3,
               ),
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    firstVehicle,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(
+                image: AssetImage(bgImage(firstVehicle)),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.white.withOpacity(0.7),
+                  BlendMode.srcATop,
+                ),
               ),
             ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // ★ 中央ラベル（乗換）
-          Column(
-            children: [
-              const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
-              const SizedBox(height: 4),
-              Text(
-                middleLabel(routeType),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(width: 8),
-
-          // ★ 後半便（赤 or 青枠）
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: vehicleBorderColor(secondVehicle),
-                  width: 3,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: AssetImage(bgImage(secondVehicle)),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.white.withOpacity(0.7),
-                    BlendMode.srcATop,
+            padding: const EdgeInsets.all(16), // 直通と同じ
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    secondVehicle,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
+                Text(
+                  firstVehicle,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(width: 8),
+
+        // ★ 中央ラベル
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
+            const SizedBox(height: 4),
+            Text(
+              middleLabel(routeType),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(width: 8),
+
+        // ★ 後半便（赤/青枠が外枠）
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: vehicleBorderColor(secondVehicle),
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(
+                image: AssetImage(bgImage(secondVehicle)),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.white.withOpacity(0.7),
+                  BlendMode.srcATop,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.all(16), // 直通と同じ
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  secondVehicle,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
