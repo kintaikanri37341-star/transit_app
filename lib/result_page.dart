@@ -120,7 +120,7 @@ class _ResultPageState extends State<ResultPage> {
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 24), // ★ カード間隔を広げた
+                    margin: const EdgeInsets.only(bottom: 24), // ★ カード間隔
                     child: isDirectType
                         ? _buildDirectCard(row, vehicle, routeType)
                         : _buildMultiLegCard(row, vehicle, routeType),
@@ -158,7 +158,7 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16), // ★ 直通カードの上下 padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -197,7 +197,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（外枠削除・左右端まで枠拡張・白背景）
+  // ★ 乗換カード（最新仕様すべて反映）
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -207,7 +207,7 @@ class _ResultPageState extends State<ResultPage> {
     return IntrinsicHeight(
       child: Container(
         color: Colors.white, // ★ 枠外背景を真っ白に
-        padding: const EdgeInsets.symmetric(vertical: 12), // ★ 左右余白を消す
+        padding: const EdgeInsets.symmetric(vertical: 16), // ★ 直通と揃える
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -249,26 +249,32 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ),
 
-            const SizedBox(width: 8),
-
-            // ★ 乗換アイコン（中央）
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
-                const SizedBox(height: 4),
-                Text(
-                  middleLabel(routeType),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+            // ★ 中央の乗換ラベル（上下に薄い線を追加して一体化）
+            Container(
+              width: 70,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFFCCCCCC), width: 1),
+                  bottom: BorderSide(color: Color(0xFFCCCCCC), width: 1),
                 ),
-              ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
+                  const SizedBox(height: 4),
+                  Text(
+                    middleLabel(routeType),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-
-            const SizedBox(width: 8),
 
             // ★ 後半便（右端まで枠を広げる）
             Expanded(
