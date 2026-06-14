@@ -254,16 +254,16 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(height: 6),
 
-          // ② 乗換（駅名入り）
+          // ② 乗換（駅名入り・太字なし・サイズ18）
           Row(
             children: [
               const Icon(Icons.arrow_downward, size: 20, color: Colors.black),
               const SizedBox(width: 4),
-              Text(
-                "乗換（${row['transfer_station']}）",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              const Text(
+                "乗換（学園通り駅）",
+                style: TextStyle(
+                  fontSize: 18, // ★ 直通カードのラベルと同じ
+                  // 太字なし
                 ),
               ),
             ],
