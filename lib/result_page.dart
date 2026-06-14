@@ -1,6 +1,3 @@
-// ★★★ あなたのコードそのまま（壊れない構造）
-// ★★★ 変更点は _buildMultiLegCard の padding のみ
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'route_detail_page.dart';
@@ -58,11 +55,13 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ 車両ごとの枠線色
   Color vehicleBorderColor(String vehicle) {
-    if (vehicle.contains("舞")) return const Color(0xFFC62828);
-    return const Color(0xFF1565C0);
+    if (vehicle.contains("舞")) return const Color(0xFFC62828); // 濃い赤
+    return const Color(0xFF1565C0); // 濃い青
   }
 
+  // ★ route_type → 表示ラベル
   String routeLabel(String routeType, String vehicle) {
     switch (routeType) {
       case "direct":
@@ -79,6 +78,7 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ middleLabel（2レグの真ん中に表示するラベル）
   String middleLabel(String routeType) {
     switch (routeType) {
       case "midday":
@@ -134,13 +134,13 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 直通カード（変更なし）
+  // ★ 直通（停留あり含む）カード：車両色の枠線（赤 or 青）
   // ============================================================
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: vehicleBorderColor(vehicle),
+          color: vehicleBorderColor(vehicle), // ★ 舞＝赤、幸＝青
           width: 3,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -182,6 +182,8 @@ class _ResultPageState extends State<ResultPage> {
                   color: Colors.black,
                 ),
               ),
+
+              // ★ 停留あり直通は P アイコン
               if (routeType == "direct_stopover")
                 const Padding(
                   padding: EdgeInsets.only(left: 6),
@@ -199,7 +201,7 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // ============================================================
-  // ★ 乗換カード（壊れない・揃う完全版）
+  // ★ 乗換カード：前半便・後半便それぞれ車両色の枠線
   // ============================================================
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
@@ -207,9 +209,8 @@ class _ResultPageState extends State<ResultPage> {
     final secondVehicle = parts[1];
 
     return Container(
-      padding: const EdgeInsets.all(16),   // ★ 直通と同じに統一（壊れない）
       decoration: BoxDecoration(
-        color: Colors.white,               // ★ 外側カードは残す（壊れないため）
+        border: Border.all(color: Colors.black, width: 2), // 外枠は黒
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -218,11 +219,12 @@ class _ResultPageState extends State<ResultPage> {
             offset: const Offset(2, 2),
           ),
         ],
+        color: Colors.white,
       ),
+      padding: const EdgeInsets.all(12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ★ 前半便（赤/青枠）
+          // ★ 前半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -230,7 +232,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(firstVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(firstVehicle)),
                   fit: BoxFit.cover,
@@ -240,7 +242,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ★ 直通と同じ
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -262,9 +264,8 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 中央ラベル
+          // ★ 中央ラベル（乗換）
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.swap_horiz, size: 28, color: Colors.black),
               const SizedBox(height: 4),
@@ -281,7 +282,7 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(width: 8),
 
-          // ★ 後半便（赤/青枠）
+          // ★ 後半便（赤 or 青枠）
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -289,7 +290,7 @@ class _ResultPageState extends State<ResultPage> {
                   color: vehicleBorderColor(secondVehicle),
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: AssetImage(bgImage(secondVehicle)),
                   fit: BoxFit.cover,
@@ -299,7 +300,7 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               ),
-              padding: const EdgeInsets.all(16), // ★ 直通と同じ
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
