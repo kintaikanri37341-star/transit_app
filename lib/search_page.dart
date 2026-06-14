@@ -313,10 +313,10 @@ class _SearchPageState extends State<SearchPage> {
                 const SizedBox(width: 8),
 
                 // 右側：上下の真ん中に 1 個だけ入替ボタン
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
+                SizedBox(
+                  height: 160, // ← 出発駅ボタン＋到着駅ボタンの高さに合わせる
+                  child: Center(
+                    child: ElevatedButton(
                       style: swapMiniButton,
                       onPressed: _swapStations,
                       child: Row(
@@ -329,7 +329,7 @@ class _SearchPageState extends State<SearchPage> {
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
