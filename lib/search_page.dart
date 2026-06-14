@@ -234,16 +234,6 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
 
-    final searchButtonStyle = ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFF8BBD0),
-      foregroundColor: Colors.black,
-      side: const BorderSide(color: Color(0xFFC62828), width: 3),
-      textStyle: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -255,16 +245,16 @@ class _SearchPageState extends State<SearchPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ★★★ ここが入替ボタンの正しい配置ロジック ★★★
+            // ★ 入替ボタンの正しい配置
             LayoutBuilder(
               builder: (context, constraints) {
                 const double buttonHeight = 56;
                 const double labelHeight = 24;
                 const double spacing = 24;
 
-                // 出発ボタンと到着ボタンの「間」の中央
+                // 2つのボタンの間の中央
                 final double swapTop =
-                    labelHeight + buttonHeight + (spacing / 2) - 20;
+                    labelHeight + buttonHeight + (spacing / 2) - 10;
 
                 return Stack(
                   children: [
@@ -324,8 +314,27 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 40),
 
+            // ★ 検索ボタン（黒枠 → 条件満たしたら赤枠）
             ElevatedButton(
-              style: searchButtonStyle,
+              style: (depart != null && arrive != null)
+                  ? ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF8BBD0),
+                      foregroundColor: Colors.black,
+                      side: const BorderSide(color: Color(0xFFC62828), width: 3),
+                      textStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFC8E6C9),
+                      foregroundColor: Colors.black,
+                      side: const BorderSide(color: Colors.black, width: 2),
+                      textStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               onPressed: (depart != null && arrive != null)
                   ? () {
                       Navigator.push(
@@ -344,6 +353,36 @@ class _SearchPageState extends State<SearchPage> {
                   SizedBox(width: 8),
                   Text('検索する'),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // ★ 注意書き3文（復活）
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      '日曜日・祝日・年末年始は運休です。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      '交通状況により、到着時間が遅れることがあります。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'あらかじめご承知おきください。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
