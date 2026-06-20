@@ -43,21 +43,18 @@ class HomePage extends StatelessWidget {
 
       body: Column(
         children: [
-          // 🔥 ヘッダー下の余白を 80 → 40 に縮める
           const SizedBox(height: 40),
 
-          // 🔥 メインロゴ領域（flex: 15 に調整）
           Expanded(
             flex: 15,
             child: Center(
               child: Image.asset(
                 "assets/images/main_logo_new.png",
-                fit: BoxFit.contain, // ← 縦横比は絶対に崩れない
+                fit: BoxFit.contain,
               ),
             ),
           ),
 
-          // 🔥 ボタン部分（ここは一切変更しない）
           Expanded(
             flex: 27,
             child: Padding(
@@ -154,14 +151,17 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
+
+                        // ★★★ ここだけ変更 ★★★
                         Expanded(
                           child: _menuButton(
-                            color: const Color(0xFFF0F0F0),
+                            color: const Color(0xFFFFCC80), // ← オレンジ色
                             icon: Icons.stars,
-                            text: "デジタル\nスタンプ",
+                            text: "お気に入り\n便", // ← 名前変更
                             onTap: () {},
                           ),
                         ),
+                        // ★★★ ここだけ変更 ★★★
                       ],
                     ),
                   ),
