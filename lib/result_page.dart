@@ -237,18 +237,26 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ① 前半便（1行）
+          // ① 前半便（時刻＋車両名＋色タグ）
           Row(
             children: [
               Text(
-                "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}　$firstVehicle",
+                "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
                 style: const TextStyle(
-                  fontSize: 22, // ★ 直通カードと同じ
+                  fontSize: 22, // 時刻は直通カードと同じ
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(width: 8),
+              Text(
+                firstVehicle,
+                style: const TextStyle(
+                  fontSize: 18, // 直通カードのラベルと同じ
+                  fontWeight: FontWeight.w400, // ★ 太字じゃない
+                ),
+              ),
               const SizedBox(width: 6),
-              colorDot(firstColor), // ★ 車両名の右に色タグ
+              colorDot(firstColor),
             ],
           ),
 
@@ -262,8 +270,8 @@ class _ResultPageState extends State<ResultPage> {
               const Text(
                 "乗換（学園通り駅）",
                 style: TextStyle(
-                  fontSize: 18, // ★ 直通カードのラベルと同じ
-                  // 太字なし
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400, // ★ 太字なし
                 ),
               ),
             ],
@@ -271,18 +279,26 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(height: 6),
 
-          // ③ 後半便（1行）
+          // ③ 後半便（時刻＋車両名＋色タグ）
           Row(
             children: [
               Text(
-                "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}　$secondVehicle",
+                "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
                 style: const TextStyle(
-                  fontSize: 22, // ★ 直通カードと同じ
+                  fontSize: 22, // 時刻は直通カードと同じ
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(width: 8),
+              Text(
+                secondVehicle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400, // ★ 太字じゃない
+                ),
+              ),
               const SizedBox(width: 6),
-              colorDot(secondColor), // ★ 車両名の右に色タグ
+              colorDot(secondColor),
             ],
           ),
         ],
