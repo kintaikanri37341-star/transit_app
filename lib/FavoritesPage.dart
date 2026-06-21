@@ -1,110 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'route_detail_page.dart';
 
-class ResultPage extends StatefulWidget {
-  final String depart;
-  final String arrive;
-
-  const ResultPage({
-    super.key,
-    required this.depart,
-    required this.arrive,
-  });
+class FavoritesPage extends StatefulWidget {
+  const FavoritesPage({super.key});
 
   @override
-  State<ResultPage> createState() => _ResultPageState();
+  State<FavoritesPage> createState() => _FavoritesPageState();
 }
 
-class _ResultPageState extends State<ResultPage> {
-  final supabase = Supabase.instance.client;
-  List<dynamic> results = [];
-  bool loading = true;
-
-  Map<String, dynamic>? selectedRow;
+class _FavoritesPageState extends State<FavoritesPage> {
+  List<Map<String, dynamic>> favorites = [];
 
   @override
   void initState() {
     super.initState();
-    fetchResults();
+    loadFavorites();
   }
 
-  Future<void> fetchResults() async {
-    final res = await supabase.rpc(
-      'search_trips',
-      params: {
-        'depart': widget.depart,
-        'arrive': widget.arrive,
-      },
-    );
+  // ★ お気に入り読み込み
+  Future<void> loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList("favorites") ?? [];
 
     setState(() {
-      results = res;
-      loading = false;
+      favorites = list.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
     });
   }
 
-  String formatTime(String? t) {
-    if (t == null) return "";
-    return t.substring(0, 5);
-  }
-
-  String bgImage(String vehicle) {
-    if (vehicle.contains("舞")) {
-      return "assets/images/maichan.jpg";
-    } else {
-      return "assets/images/sachichan.jpg";
-    }
-  }
-
-  Color vehicleBorderColor(String vehicle) {
-    if (vehicle.contains("舞")) return const Color(0xFFC62828);
-    return const Color(0xFF1565C0);
-  }
-
-  String routeLabel(String routeType, String vehicle) {
-    switch (routeType) {
-      case "direct":
-        return "直通（$vehicle）";
-      case "direct_stopover":
-        return "直通（停留あり・$vehicle）";
-      case "midday":
-        return "昼休憩後出発（同一車両）";
-      case "detour":
-        return "他コース周回後出発（同一車両）";
-      case "transfer":
-      default:
-        return "乗換";
-    }
-  }
-
-  String middleLabel(String routeType) {
-    switch (routeType) {
-      case "midday":
-        return "昼休憩後出発\n（同一車両）";
-      case "detour":
-        return "他コース周回後出発\n（同一車両）";
-      case "transfer":
-      default:
-        return "乗換";
-    }
-  }
-
-  // ★ お気に入り保存
-  Future<void> saveFavorite(Map row) async {
+  // ★ お気に入り削除
+  Future<void> removeFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> list = prefs.getStringList("favorites") ?? [];
-    list.add(jsonEncode(row));
+
+    list.remove(jsonEncode(row));
     await prefs.setStringList("favorites", list);
+
+    await loadFavorites();
   }
 
-  // ★ メニュー表示（あなたの要望をすべて反映）
+  // ★ メニュー表示（ResultPage と同じ仕様）
   void showTripMenu(Map row) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white, // 背景は真っ白
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -114,7 +54,6 @@ class _ResultPageState extends State<ResultPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ① 出発10分前に音で通知する
               _menuItem(
                 icon: Icons.alarm,
                 text: "出発10分前に音で通知する",
@@ -125,7 +64,6 @@ class _ResultPageState extends State<ResultPage> {
 
               const SizedBox(height: 22),
 
-              // ② 経路・時刻の詳細を見る
               _menuItem(
                 icon: Icons.route,
                 text: "経路・時刻の詳細を見る",
@@ -142,12 +80,11 @@ class _ResultPageState extends State<ResultPage> {
 
               const SizedBox(height: 22),
 
-              // ③ お気に入り便に追加する
               _menuItem(
-                icon: Icons.star,
-                text: "お気に入り便に追加する",
+                icon: Icons.delete,
+                text: "お気に入り便から削除する",
                 onTap: () async {
-                  await saveFavorite(row);
+                  await removeFavorite(row);
                   Navigator.pop(context);
                 },
               ),
@@ -158,7 +95,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ メニューアイテム（太字・22px・縮小して1行に収める）
+  // ★ メニューアイテム（太字・22px・改行なし）
   Widget _menuItem({
     required IconData icon,
     required String text,
@@ -188,22 +125,47 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
+  // ★ 車両色
+  Color vehicleBorderColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFC62828);
+    return const Color(0xFF1565C0);
+  }
+
+  // ★ 背景画像
+  String bgImage(String vehicle) {
+    if (vehicle.contains("舞")) {
+      return "assets/images/maichan.jpg";
+    } else {
+      return "assets/images/sachichan.jpg";
+    }
+  }
+
+  String formatTime(String? t) {
+    if (t == null) return "";
+    return t.substring(0, 5);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("${widget.depart} → ${widget.arrive}"),
+        title: const Text("お気に入り便"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
+      body: favorites.isEmpty
+          ? const Center(
+              child: Text(
+                "お気に入り便はありません",
+                style: TextStyle(fontSize: 20),
+              ),
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: results.length,
+              itemCount: favorites.length,
               itemBuilder: (context, index) {
-                final row = results[index];
+                final row = favorites[index];
                 final routeType = row['route_type'] as String;
                 final vehicle = row['vehicle'] as String;
 
@@ -212,9 +174,6 @@ class _ResultPageState extends State<ResultPage> {
 
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      selectedRow = row;
-                    });
                     showTripMenu(row);
                   },
                   child: Container(
@@ -229,7 +188,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ 直通カード（元のまま）
+  // ★ 直通カード（ResultPage と同じ）
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
@@ -267,32 +226,19 @@ class _ResultPageState extends State<ResultPage> {
             ),
           ),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              Text(
-                routeLabel(routeType, vehicle),
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-              if (routeType == "direct_stopover")
-                const Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Icon(
-                    Icons.local_parking,
-                    color: Colors.orange,
-                    size: 26,
-                  ),
-                ),
-            ],
+          Text(
+            "直通（${row['vehicle']}）",
+            style: const TextStyle(
+              fontSize: 18,
+              color: Colors.black,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ★ 乗換カード（元のまま）
+  // ★ 乗換カード（ResultPage と同じ）
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -351,11 +297,11 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(height: 6),
 
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.arrow_downward, size: 20, color: Colors.black),
-              const SizedBox(width: 4),
-              const Text(
+              Icon(Icons.arrow_downward, size: 20, color: Colors.black),
+              SizedBox(width: 4),
+              Text(
                 "乗換（学園通り駅）",
                 style: TextStyle(
                   fontSize: 18,
