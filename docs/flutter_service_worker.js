@@ -70,7 +70,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ★ fetch：キャッシュ優先（必要なら変更可能）
+// ★ fetch：キャッシュ優先
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -93,4 +93,73 @@ self.addEventListener("fetch", (event) => {
       });
     })
   );
+});
+
+
+// ------------------------------------------------------------
+// ★★★ アラーム機能（alarm.mp3 再生 + UI 自動解除対応） ★★★
+// ------------------------------------------------------------
+
+let alarmTimers = {}; // key: depart_timeHHmm → setTimeout ID
+
+self.addEventListener('message', (event) => {
+  if (!event.data) return;
+
+  // ★ アラーム設定
+  if (event.data.type === 'set-alarm') {
+    const key = event.data.key; // "7:19" など
+    const timestamp = event.data.timestamp;
+    const delay = timestamp - Date.now();
+
+    if (delay <= 0) return;
+
+    // 既存アラームがあれば解除
+    if (alarmTimers[key]) {
+      clearTimeout(alarmTimers[key]);
+    }
+
+    alarmTimers[key] = setTimeout(() => {
+
+      // ★ 通知表示
+      self.registration.showNotification("バスの出発10分前です", {
+        body: "そろそろ出発の準備をしてください。",
+        icon: "/icons/Icon-192.png",
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        sound: "/alarm.mp3"
+      });
+
+      // ★ 裏技：音を直接鳴らす（Android Chrome で有効）
+      try {
+        const audio = new Audio("/alarm.mp3");
+        audio.play();
+      } catch (e) {
+        console.log("音再生はブラウザにブロックされました");
+      }
+
+      // ★ Flutter へ「アラーム鳴った」通知を送る（UI 自動解除）
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: "alarm-fired",
+            key: key
+          });
+        });
+      });
+
+      // ★ タイマー削除
+      delete alarmTimers[key];
+
+    }, delay);
+  }
+
+  // ★ アラーム解除
+  if (event.data.type === 'cancel-alarm') {
+    const key = event.data.key;
+
+    if (alarmTimers[key]) {
+      clearTimeout(alarmTimers[key]);
+      delete alarmTimers[key];
+    }
+  }
 });

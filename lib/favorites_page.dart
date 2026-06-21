@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:html' as html; // ★ 追加
 import 'route_detail_page.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -23,10 +24,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
   bool fadeOutList = false;
   bool fadeInMenu = false;
 
+  // ★ アラーム管理
+  Set<String> activeAlarms = {};
+
   @override
   void initState() {
     super.initState();
     loadFavorites();
+
+    // ★ アラームが鳴ったら UI を自動リセット
+    html.window.onMessage.listen((event) {
+      if (event.data is Map && event.data["type"] == "alarm-fired") {
+        final key = event.data["key"];
+        activeAlarms.remove(key);
+        setState(() {});
+      }
+    });
   }
 
   Future<void> loadFavorites() async {
@@ -47,7 +60,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
     await loadFavorites();
 
-    // ★ 削除ポップアップ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("お気に入り便から削除しました"),
@@ -56,7 +68,84 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ カードタップ時の処理（ResultPage と同じ）
+  // ★ アラーム設定ロジック
+  void setAlarmForBus(BuildContext context, String departTimeHHmm) {
+    final now = DateTime.now();
+
+    final parts = departTimeHHmm.split(":");
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    DateTime target = DateTime(now.year, now.month, now.day, hour, minute);
+
+    // すでに出発
+    if (target.isBefore(now)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("今日のこの便はすでに出発しました。アラームは設定できません。"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 10分以内
+    final diff = target.difference(now).inMinutes;
+    if (diff < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("10分以内にバスが来る予定です。アラームは設定できません。"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 10分前
+    final alarmTime = target.subtract(const Duration(minutes: 10));
+
+    html.Notification.requestPermission().then((permission) {
+      if (permission == "granted") {
+        html.window.navigator.serviceWorker?.controller?.postMessage({
+          "type": "set-alarm",
+          "timestamp": alarmTime.millisecondsSinceEpoch,
+          "key": departTimeHHmm,
+        });
+
+        activeAlarms.add(departTimeHHmm);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("アラームを設定しました。"),
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        setState(() {});
+      }
+    });
+  }
+
+  // ★ アラーム解除
+  void cancelAlarm(String departTimeHHmm) {
+    html.window.navigator.serviceWorker?.controller?.postMessage({
+      "type": "cancel-alarm",
+      "key": departTimeHHmm,
+    });
+
+    activeAlarms.remove(departTimeHHmm);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("アラームを解除しました。"),
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    setState(() {});
+  }
+
+  // ★ カードタップ時の処理
   void onSelectRow(Map row, int index) {
     final key = cardKeys[index];
     if (key == null) return;
@@ -81,7 +170,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     });
   }
 
-  // ★ 選択解除（背景・×・カードすべてで閉じる）
   void closeOverlay() {
     setState(() {
       fadeInMenu = false;
@@ -129,7 +217,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
       ),
       body: Stack(
         children: [
-          // ★ ListView（フェードアウト）
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: fadeOutList ? 0 : 1,
@@ -158,7 +245,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         child: Container(
                           key: cardKeys[index],
                           margin: const EdgeInsets.only(bottom: 16),
-                          width: double.infinity, // ★ 横幅を画面いっぱいに固定
+                          width: double.infinity,
                           child: isDirectType
                               ? _buildDirectCard(row, vehicle)
                               : _buildMultiLegCard(row, vehicle),
@@ -168,14 +255,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   ),
           ),
 
-          // ★ 背景（真っ白）タップで閉じる
           if (showOverlay)
             GestureDetector(
               onTap: closeOverlay,
               child: Container(color: Colors.white),
             ),
 
-          // ★ 選択されたカード（元の位置 → 中央へ移動）
           if (showOverlay && selectedRow != null)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
@@ -188,7 +273,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // ★ ×（タップで閉じる）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
@@ -207,7 +291,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     ),
                   ),
 
-                  // ★ 選択されたカード（タップで閉じる）
                   GestureDetector(
                     onTap: closeOverlay,
                     child: Builder(
@@ -228,14 +311,31 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
                   const SizedBox(height: 20),
 
-                  // ★ メニュー（フェードイン）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
                     child: Column(
                       children: [
-                        _menuButton("アラームを設定する", Icons.alarm, () {}),
+                        // ★ アラームボタン（ON/OFF 切替）
+                        Builder(builder: (_) {
+                          final departTime = selectedRow!['depart_time'];
+                          final isActive = activeAlarms.contains(departTime);
+
+                          return _menuButton(
+                            isActive ? "アラームを解除する" : "アラームを設定する",
+                            Icons.alarm,
+                            () {
+                              if (isActive) {
+                                cancelAlarm(departTime);
+                              } else {
+                                setAlarmForBus(context, departTime);
+                              }
+                            },
+                          );
+                        }),
+
                         const SizedBox(height: 22),
+
                         _menuButton("経路・時刻の詳細を見る", Icons.route, () {
                           Navigator.push(
                             context,
@@ -244,7 +344,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             ),
                           );
                         }),
+
                         const SizedBox(height: 22),
+
                         _menuButton("お気に入り便から削除する", Icons.delete, () async {
                           await removeFavorite(selectedRow!);
                           closeOverlay();
@@ -283,7 +385,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 直通カード（駅名22px）
+  // ★ 直通カード
   Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
       width: double.infinity,
@@ -316,7 +418,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
-              fontSize: 22, // ★ 駅名22px
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -347,7 +449,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 乗換カード（駅名22px）
+  // ★ 乗換カード
   Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -383,7 +485,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
-              fontSize: 22, // ★ 駅名22px
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),

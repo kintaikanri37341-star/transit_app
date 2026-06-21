@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:html' as html; // ★ 追加
 import 'route_detail_page.dart';
 
 class ResultPage extends StatefulWidget {
@@ -34,10 +35,22 @@ class _ResultPageState extends State<ResultPage> {
   bool fadeOutList = false;
   bool fadeInMenu = false;
 
+  // ★ アラーム管理
+  Set<String> activeAlarms = {};
+
   @override
   void initState() {
     super.initState();
     fetchResults();
+
+    // ★ アラームが鳴ったら UI を自動リセット
+    html.window.onMessage.listen((event) {
+      if (event.data is Map && event.data["type"] == "alarm-fired") {
+        final key = event.data["key"];
+        activeAlarms.remove(key);
+        setState(() {});
+      }
+    });
   }
 
   Future<void> fetchResults() async {
@@ -53,6 +66,83 @@ class _ResultPageState extends State<ResultPage> {
       results = res;
       loading = false;
     });
+  }
+
+  // ★ アラーム設定ロジック
+  void setAlarmForBus(BuildContext context, String departTimeHHmm) {
+    final now = DateTime.now();
+
+    final parts = departTimeHHmm.split(":");
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    DateTime target = DateTime(now.year, now.month, now.day, hour, minute);
+
+    // すでに出発
+    if (target.isBefore(now)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("今日のこの便はすでに出発しました。アラームは設定できません。"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 10分以内
+    final diff = target.difference(now).inMinutes;
+    if (diff < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("10分以内にバスが来る予定です。アラームは設定できません。"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 10分前
+    final alarmTime = target.subtract(const Duration(minutes: 10));
+
+    html.Notification.requestPermission().then((permission) {
+      if (permission == "granted") {
+        html.window.navigator.serviceWorker?.controller?.postMessage({
+          "type": "set-alarm",
+          "timestamp": alarmTime.millisecondsSinceEpoch,
+          "key": departTimeHHmm,
+        });
+
+        activeAlarms.add(departTimeHHmm);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("アラームを設定しました。"),
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        setState(() {});
+      }
+    });
+  }
+
+  // ★ アラーム解除
+  void cancelAlarm(String departTimeHHmm) {
+    html.window.navigator.serviceWorker?.controller?.postMessage({
+      "type": "cancel-alarm",
+      "key": departTimeHHmm,
+    });
+
+    activeAlarms.remove(departTimeHHmm);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("アラームを解除しました。"),
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    setState(() {});
   }
 
   String formatTime(String? t) {
@@ -126,7 +216,6 @@ class _ResultPageState extends State<ResultPage> {
       showOverlay = true;
     });
 
-    // ★ ListView をフェードアウト → カード移動 → メニュー表示
     Future.delayed(const Duration(milliseconds: 10), () {
       setState(() => fadeOutList = true);
     });
@@ -136,21 +225,17 @@ class _ResultPageState extends State<ResultPage> {
     });
   }
 
-  // ★ 選択解除（背景・×・カードすべてで呼ばれる）
   void closeOverlay() {
-    // ① メニューをフェードアウト
     setState(() {
       fadeInMenu = false;
     });
 
-    // ② カードを中央 → 元の位置へ戻す
     Future.delayed(const Duration(milliseconds: 50), () {
       setState(() {
-        fadeOutList = false; // ListView をフェードイン
+        fadeOutList = false;
       });
     });
 
-    // ③ アニメーション完了後にオーバーレイを消す
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         showOverlay = false;
@@ -172,7 +257,6 @@ class _ResultPageState extends State<ResultPage> {
       ),
       body: Stack(
         children: [
-          // ★ ListView（フェードアウト）
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: fadeOutList ? 0 : 1,
@@ -205,16 +289,14 @@ class _ResultPageState extends State<ResultPage> {
                   ),
           ),
 
-          // ★ オーバーレイ（背景タップで閉じる）
           if (showOverlay)
             GestureDetector(
               onTap: closeOverlay,
               child: Container(
-                color: Colors.white, // ← ②背景を真っ白に
+                color: Colors.white,
               ),
             ),
 
-          // ★ 選択されたカード（元の位置 → 中央へ移動）
           if (showOverlay && selectedRow != null)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
@@ -227,12 +309,11 @@ class _ResultPageState extends State<ResultPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // ★ × マーク（タップで閉じる）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
                     child: GestureDetector(
-                      onTap: closeOverlay, // ← ①×でも閉じる
+                      onTap: closeOverlay,
                       child: const Padding(
                         padding: EdgeInsets.only(right: 4, bottom: 8),
                         child: Text(
@@ -246,9 +327,8 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
 
-                  // ★ 選択されたカード本体（タップで閉じる）
                   GestureDetector(
-                    onTap: closeOverlay, // ← ①カードでも閉じる
+                    onTap: closeOverlay,
                     child: Builder(
                       builder: (_) {
                         final row = selectedRow!;
@@ -267,14 +347,31 @@ class _ResultPageState extends State<ResultPage> {
 
                   const SizedBox(height: 20),
 
-                  // ★ メニュー（フェードイン）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
                     child: Column(
                       children: [
-                        _menuButton("アラームを設定する", Icons.alarm, () {}),
+                        // ★ アラームボタン（ON/OFF 切替）
+                        Builder(builder: (_) {
+                          final departTime = selectedRow!['depart_time'];
+                          final isActive = activeAlarms.contains(departTime);
+
+                          return _menuButton(
+                            isActive ? "アラームを解除する" : "アラームを設定する",
+                            Icons.alarm,
+                            () {
+                              if (isActive) {
+                                cancelAlarm(departTime);
+                              } else {
+                                setAlarmForBus(context, departTime);
+                              }
+                            },
+                          );
+                        }),
+
                         const SizedBox(height: 22),
+
                         _menuButton("経路・時刻の詳細を見る", Icons.route, () {
                           Navigator.push(
                             context,
@@ -283,7 +380,9 @@ class _ResultPageState extends State<ResultPage> {
                             ),
                           );
                         }),
+
                         const SizedBox(height: 22),
+
                         _menuButton("お気に入り便に追加する", Icons.star, () async {
                           await saveFavorite(selectedRow!);
                           showAddedPopup();
