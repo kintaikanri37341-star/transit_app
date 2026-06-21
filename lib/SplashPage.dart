@@ -9,13 +9,13 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  bool _navigated = false; // ★ 多重遷移防止
 
   @override
   void initState() {
     super.initState();
 
-    // ★ 起動時の強制更新チェック（いったん無効化）
-    /*
+    // ★ 起動時に強制更新チェック
     html.window.navigator.serviceWorker?.getRegistrations().then((regs) {
       for (var reg in regs) {
         reg.update().then((_) {
@@ -25,17 +25,24 @@ class _SplashPageState extends State<SplashPage> {
         });
       }
     });
-    */
+
+    // ★ 3秒後に自動遷移
+    Future.delayed(const Duration(seconds: 3), () {
+      _goHome();
+    });
   }
 
-  void goHome() {
+  void _goHome() {
+    if (_navigated) return; // ★ すでに遷移済みなら何もしない
+    _navigated = true;
+
     Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: goHome,
+      onTap: _goHome, // ★ タップでも遷移
       child: Scaffold(
         body: Stack(
           children: [
@@ -43,28 +50,6 @@ class _SplashPageState extends State<SplashPage> {
               child: Image.asset(
                 'assets/images/splash.png',
                 fit: BoxFit.cover,
-              ),
-            ),
-            Positioned(
-              top: 80,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  'タップしてスタート',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 8,
-                        color: Colors.black54,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ],
