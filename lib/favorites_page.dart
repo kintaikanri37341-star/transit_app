@@ -19,7 +19,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     loadFavorites();
   }
 
-  // ★ お気に入り読み込み
   Future<void> loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList("favorites") ?? [];
@@ -29,7 +28,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     });
   }
 
-  // ★ お気に入り削除
   Future<void> removeFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> list = prefs.getStringList("favorites") ?? [];
@@ -40,7 +38,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     await loadFavorites();
   }
 
-  // ★ メニュー表示（ResultPage と同じ仕様）
   void showTripMenu(Map row) {
     showModalBottomSheet(
       context: context,
@@ -95,7 +92,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ メニューアイテム（太字・22px・改行なし）
   Widget _menuItem({
     required IconData icon,
     required String text,
@@ -125,13 +121,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 車両色
   Color vehicleBorderColor(String vehicle) {
     if (vehicle.contains("舞")) return const Color(0xFFC62828);
     return const Color(0xFF1565C0);
   }
 
-  // ★ 背景画像
   String bgImage(String vehicle) {
     if (vehicle.contains("舞")) {
       return "assets/images/maichan.jpg";
@@ -188,7 +182,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 直通カード（ResultPage と同じ）
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
@@ -238,7 +231,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 乗換カード（ResultPage と同じ）
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
