@@ -24,7 +24,15 @@ class _ResultPageState extends State<ResultPage> {
   bool loading = true;
 
   Map<String, dynamic>? selectedRow;
+
+  // ★ カード位置取得用
+  final Map<int, GlobalKey> cardKeys = {};
+  double selectedTop = 0;
+
+  // ★ アニメーション制御
   bool showOverlay = false;
+  bool fadeOutList = false;
+  bool fadeInMenu = false;
 
   @override
   void initState() {
@@ -102,17 +110,43 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  void onSelectRow(Map row) {
+  // ★ カードタップ時の処理
+  void onSelectRow(Map row, int index) {
+    final key = cardKeys[index];
+    if (key == null) return;
+
+    final box = key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final pos = box.localToGlobal(Offset.zero);
+
     setState(() {
       selectedRow = Map<String, dynamic>.from(row);
+      selectedTop = pos.dy;
       showOverlay = true;
+    });
+
+    // ★ ListView をフェードアウト → カード移動 → メニュー表示
+    Future.delayed(const Duration(milliseconds: 10), () {
+      setState(() => fadeOutList = true);
+    });
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() => fadeInMenu = true);
     });
   }
 
   void closeOverlay() {
     setState(() {
-      showOverlay = false;
-      selectedRow = null;
+      fadeInMenu = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      setState(() {
+        fadeOutList = false;
+        showOverlay = false;
+        selectedRow = null;
+      });
     });
   }
 
@@ -129,33 +163,41 @@ class _ResultPageState extends State<ResultPage> {
       ),
       body: Stack(
         children: [
-          loading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: listToShow.length,
-                  itemBuilder: (context, index) {
-                    final row = listToShow[index];
-                    final routeType = row['route_type'] as String;
-                    final vehicle = row['vehicle'] as String;
+          // ★ ListView（フェードアウト）
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: fadeOutList ? 0 : 1,
+            child: loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: listToShow.length,
+                    itemBuilder: (context, index) {
+                      cardKeys[index] = GlobalKey();
 
-                    final isDirectType =
-                        routeType == "direct" || routeType == "direct_stopover";
+                      final row = listToShow[index];
+                      final routeType = row['route_type'] as String;
+                      final vehicle = row['vehicle'] as String;
 
-                    return GestureDetector(
-                      onTap: () => onSelectRow(row),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: isDirectType
-                            ? _buildDirectCard(row, vehicle, routeType)
-                            : _buildMultiLegCard(row, vehicle, routeType),
-                      ),
-                    );
-                  },
-                ),
+                      final isDirectType =
+                          routeType == "direct" || routeType == "direct_stopover";
 
-          // ★ オーバーレイ（中央に移動するカード）
-          if (showOverlay && selectedRow != null)
+                      return GestureDetector(
+                        onTap: () => onSelectRow(row, index),
+                        child: Container(
+                          key: cardKeys[index],
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: isDirectType
+                              ? _buildDirectCard(row, vehicle, routeType)
+                              : _buildMultiLegCard(row, vehicle, routeType),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+
+          // ★ オーバーレイ（背景タップで閉じる）
+          if (showOverlay)
             GestureDetector(
               onTap: closeOverlay,
               child: Container(
@@ -163,29 +205,36 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ),
 
+          // ★ 選択されたカード（元の位置 → 中央へ移動）
           if (showOverlay && selectedRow != null)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-              top: MediaQuery.of(context).size.height * 0.22,
+              top: fadeOutList
+                  ? MediaQuery.of(context).size.height * 0.22
+                  : selectedTop,
               left: 16,
               right: 16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // ★ × マーク（飾り）
-                  const Padding(
-                    padding: EdgeInsets.only(right: 4, bottom: 8),
-                    child: Text(
-                      "×",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                  // ★ × マーク（フェードイン）
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: fadeInMenu ? 1 : 0,
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: 4, bottom: 8),
+                      child: Text(
+                        "×",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
 
-                  // ★ 選択された便カード
+                  // ★ 選択されたカード本体
                   Builder(
                     builder: (_) {
                       final row = selectedRow!;
@@ -203,23 +252,31 @@ class _ResultPageState extends State<ResultPage> {
 
                   const SizedBox(height: 20),
 
-                  // ★ メニュー3つ（中央のカードの直下）
-                  _menuButton("アラームを設定する", Icons.alarm, () {}),
-                  const SizedBox(height: 22),
-                  _menuButton("経路・時刻の詳細を見る", Icons.route, () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => RouteDetailPage(row: selectedRow!),
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 22),
-                  _menuButton("お気に入り便に追加する", Icons.star, () async {
-                    await saveFavorite(selectedRow!);
-                    showAddedPopup();
-                    closeOverlay();
-                  }),
+                  // ★ メニュー（フェードイン）
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: fadeInMenu ? 1 : 0,
+                    child: Column(
+                      children: [
+                        _menuButton("アラームを設定する", Icons.alarm, () {}),
+                        const SizedBox(height: 22),
+                        _menuButton("経路・時刻の詳細を見る", Icons.route, () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RouteDetailPage(row: selectedRow!),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 22),
+                        _menuButton("お気に入り便に追加する", Icons.star, () async {
+                          await saveFavorite(selectedRow!);
+                          showAddedPopup();
+                          closeOverlay();
+                        }),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
