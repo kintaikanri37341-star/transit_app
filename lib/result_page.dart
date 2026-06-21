@@ -80,12 +80,14 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  // ★ お気に入り保存（depart/arrive を追加 → NULL→NULL 解消）
+  // ★ お気に入り保存（駅名を裏で埋め込む）
   Future<void> saveFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> list = prefs.getStringList("favorites") ?? [];
 
     final newRow = Map<String, dynamic>.from(row);
+
+    // ★ ここで駅名を埋め込む（ResultPage では表示しないが Favorites で使う）
     newRow['depart'] = widget.depart;
     newRow['arrive'] = widget.arrive;
 
@@ -237,6 +239,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
+  // ★ 駅名は表示しない（AppBar に出ているため）
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
@@ -265,18 +268,6 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ どこ発 → どこ着
-          Text(
-            "${row['depart']} → ${row['arrive']}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
           Text(
             "${formatTime(row['depart_time'])} → ${formatTime(row['arrive_time'])}",
             style: const TextStyle(
@@ -348,18 +339,6 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ どこ発 → どこ着
-          Text(
-            "${row['depart']} → ${row['arrive']}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
           Row(
             children: [
               Text(

@@ -193,7 +193,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 直通カード（どこ発→どこ着 追加済み）
+  // ★ 直通カード（駅名表示あり）
   Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
       decoration: BoxDecoration(
@@ -222,7 +222,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ 追加：どこ発 → どこ着
+          // ★ 駅名（ResultPage で保存したもの）
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
@@ -257,7 +257,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 乗換カード（どこ発→どこ着 追加済み）
+  // ★ 乗換カード（駅名表示あり）
   Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -289,7 +289,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ 追加：どこ発 → どこ着
+          // ★ 駅名
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
