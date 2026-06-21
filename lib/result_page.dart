@@ -80,10 +80,16 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  // ★ お気に入り保存（depart/arrive を追加 → NULL→NULL 解消）
   Future<void> saveFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> list = prefs.getStringList("favorites") ?? [];
-    list.add(jsonEncode(row));
+
+    final newRow = Map<String, dynamic>.from(row);
+    newRow['depart'] = widget.depart;
+    newRow['arrive'] = widget.arrive;
+
+    list.add(jsonEncode(newRow));
     await prefs.setStringList("favorites", list);
   }
 
@@ -259,6 +265,18 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ★ どこ発 → どこ着
+          Text(
+            "${row['depart']} → ${row['arrive']}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
           Text(
             "${formatTime(row['depart_time'])} → ${formatTime(row['arrive_time'])}",
             style: const TextStyle(
@@ -330,6 +348,18 @@ class _ResultPageState extends State<ResultPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ★ どこ発 → どこ着
+          Text(
+            "${row['depart']} → ${row['arrive']}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
           Row(
             children: [
               Text(
