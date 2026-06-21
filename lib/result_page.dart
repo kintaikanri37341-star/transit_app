@@ -136,14 +136,23 @@ class _ResultPageState extends State<ResultPage> {
     });
   }
 
+  // ★ 選択解除（背景・×・カードすべてで呼ばれる）
   void closeOverlay() {
+    // ① メニューをフェードアウト
     setState(() {
       fadeInMenu = false;
     });
 
-    Future.delayed(const Duration(milliseconds: 200), () {
+    // ② カードを中央 → 元の位置へ戻す
+    Future.delayed(const Duration(milliseconds: 50), () {
       setState(() {
-        fadeOutList = false;
+        fadeOutList = false; // ListView をフェードイン
+      });
+    });
+
+    // ③ アニメーション完了後にオーバーレイを消す
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
         showOverlay = false;
         selectedRow = null;
       });
@@ -201,7 +210,7 @@ class _ResultPageState extends State<ResultPage> {
             GestureDetector(
               onTap: closeOverlay,
               child: Container(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.white, // ← ②背景を真っ白に
               ),
             ),
 
@@ -218,36 +227,42 @@ class _ResultPageState extends State<ResultPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // ★ × マーク（フェードイン）
+                  // ★ × マーク（タップで閉じる）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
-                    child: const Padding(
-                      padding: EdgeInsets.only(right: 4, bottom: 8),
-                      child: Text(
-                        "×",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                    child: GestureDetector(
+                      onTap: closeOverlay, // ← ①×でも閉じる
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 4, bottom: 8),
+                        child: Text(
+                          "×",
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
 
-                  // ★ 選択されたカード本体
-                  Builder(
-                    builder: (_) {
-                      final row = selectedRow!;
-                      final routeType = row['route_type'] as String;
-                      final vehicle = row['vehicle'] as String;
+                  // ★ 選択されたカード本体（タップで閉じる）
+                  GestureDetector(
+                    onTap: closeOverlay, // ← ①カードでも閉じる
+                    child: Builder(
+                      builder: (_) {
+                        final row = selectedRow!;
+                        final routeType = row['route_type'] as String;
+                        final vehicle = row['vehicle'] as String;
 
-                      final isDirectType =
-                          routeType == "direct" || routeType == "direct_stopover";
+                        final isDirectType =
+                            routeType == "direct" || routeType == "direct_stopover";
 
-                      return isDirectType
-                          ? _buildDirectCard(row, vehicle, routeType)
-                          : _buildMultiLegCard(row, vehicle, routeType);
-                    },
+                        return isDirectType
+                            ? _buildDirectCard(row, vehicle, routeType)
+                            : _buildMultiLegCard(row, vehicle, routeType);
+                      },
+                    ),
                   ),
 
                   const SizedBox(height: 20),

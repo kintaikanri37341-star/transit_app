@@ -14,6 +14,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
   List<Map<String, dynamic>> favorites = [];
   Map<String, dynamic>? selectedRow;
 
+  // ★ カード位置取得用
+  final Map<int, GlobalKey> cardKeys = {};
+  double selectedTop = 0;
+
+  // ★ アニメーション制御
+  bool showOverlay = false;
+  bool fadeOutList = false;
+  bool fadeInMenu = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,97 +48,49 @@ class _FavoritesPageState extends State<FavoritesPage> {
     await loadFavorites();
   }
 
-  void showTripMenu(Map row) {
+  // ★ カードタップ時の処理（ResultPage と同じ）
+  void onSelectRow(Map row, int index) {
+    final key = cardKeys[index];
+    if (key == null) return;
+
+    final box = key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final pos = box.localToGlobal(Offset.zero);
+
     setState(() {
       selectedRow = Map<String, dynamic>.from(row);
+      selectedTop = pos.dy;
+      showOverlay = true;
     });
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      barrierColor: Colors.transparent,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _menuItem(
-                icon: Icons.alarm,
-                text: "アラームを設定する",
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
+    Future.delayed(const Duration(milliseconds: 10), () {
+      setState(() => fadeOutList = true);
+    });
 
-              const SizedBox(height: 22),
-
-              _menuItem(
-                icon: Icons.route,
-                text: "経路・時刻の詳細を見る",
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RouteDetailPage(row: row),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 22),
-
-              _menuItem(
-                icon: Icons.delete,
-                text: "お気に入り便から削除する",
-                onTap: () async {
-                  await removeFavorite(row);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    ).whenComplete(() {
-      setState(() {
-        selectedRow = null;
-      });
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() => fadeInMenu = true);
     });
   }
 
-  Widget _menuItem({
-    required IconData icon,
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(icon, size: 28, color: Colors.black),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  // ★ 選択解除（背景・×・カードすべてで閉じる）
+  void closeOverlay() {
+    setState(() {
+      fadeInMenu = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 50), () {
+      setState(() {
+        fadeOutList = false;
+      });
+    });
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
+        showOverlay = false;
+        selectedRow = null;
+      });
+    });
   }
 
   Color vehicleBorderColor(String vehicle) {
@@ -149,8 +110,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final listToShow =
-        selectedRow != null ? [selectedRow!] : favorites;
+    final listToShow = favorites;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -159,37 +119,158 @@ class _FavoritesPageState extends State<FavoritesPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: listToShow.isEmpty
-          ? const Center(
-              child: Text(
-                "お気に入り便はありません",
-                style: TextStyle(fontSize: 20),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: listToShow.length,
-              itemBuilder: (context, index) {
-                final row = listToShow[index];
-                final routeType = row['route_type'] as String;
-                final vehicle = row['vehicle'] as String;
+      body: Stack(
+        children: [
+          // ★ ListView（フェードアウト）
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: fadeOutList ? 0 : 1,
+            child: listToShow.isEmpty
+                ? const Center(
+                    child: Text(
+                      "お気に入り便はありません",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: listToShow.length,
+                    itemBuilder: (context, index) {
+                      cardKeys[index] = GlobalKey();
 
-                final isDirectType =
-                    routeType == "direct" || routeType == "direct_stopover";
+                      final row = listToShow[index];
+                      final routeType = row['route_type'] as String;
+                      final vehicle = row['vehicle'] as String;
 
-                return GestureDetector(
-                  onTap: () {
-                    showTripMenu(row);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: isDirectType
-                        ? _buildDirectCard(row, vehicle)
-                        : _buildMultiLegCard(row, vehicle),
+                      final isDirectType =
+                          routeType == "direct" || routeType == "direct_stopover";
+
+                      return GestureDetector(
+                        onTap: () => onSelectRow(row, index),
+                        child: Container(
+                          key: cardKeys[index],
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: isDirectType
+                              ? _buildDirectCard(row, vehicle)
+                              : _buildMultiLegCard(row, vehicle),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+          ),
+
+          // ★ 背景（真っ白）タップで閉じる
+          if (showOverlay)
+            GestureDetector(
+              onTap: closeOverlay,
+              child: Container(color: Colors.white),
             ),
+
+          // ★ 選択されたカード（元の位置 → 中央へ移動）
+          if (showOverlay && selectedRow != null)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              top: fadeOutList
+                  ? MediaQuery.of(context).size.height * 0.22
+                  : selectedTop,
+              left: 16,
+              right: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // ★ ×（タップで閉じる）
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: fadeInMenu ? 1 : 0,
+                    child: GestureDetector(
+                      onTap: closeOverlay,
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 4, bottom: 8),
+                        child: Text(
+                          "×",
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ★ 選択されたカード（タップで閉じる）
+                  GestureDetector(
+                    onTap: closeOverlay,
+                    child: Builder(
+                      builder: (_) {
+                        final row = selectedRow!;
+                        final routeType = row['route_type'] as String;
+                        final vehicle = row['vehicle'] as String;
+
+                        final isDirectType =
+                            routeType == "direct" || routeType == "direct_stopover";
+
+                        return isDirectType
+                            ? _buildDirectCard(row, vehicle)
+                            : _buildMultiLegCard(row, vehicle);
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ★ メニュー（フェードイン）
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: fadeInMenu ? 1 : 0,
+                    child: Column(
+                      children: [
+                        _menuButton("アラームを設定する", Icons.alarm, () {}),
+                        const SizedBox(height: 22),
+                        _menuButton("経路・時刻の詳細を見る", Icons.route, () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RouteDetailPage(row: selectedRow!),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 22),
+                        _menuButton("お気に入り便から削除する", Icons.delete, () async {
+                          await removeFavorite(selectedRow!);
+                          closeOverlay();
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menuButton(String text, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, size: 28, color: Colors.black),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -222,7 +303,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ 駅名（ResultPage で保存したもの）
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
@@ -289,7 +369,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ★ 駅名
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
