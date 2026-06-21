@@ -193,6 +193,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ★ 直通カード（どこ発→どこ着 追加済み）
   Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
       decoration: BoxDecoration(
@@ -212,8 +213,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.18), // ★ 鮮やかさ復活
-            BlendMode.srcATop,              // ★ Web で暗くならない
+            Colors.white.withOpacity(0.18),
+            BlendMode.srcATop,
           ),
         ),
       ),
@@ -221,6 +222,18 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ★ 追加：どこ発 → どこ着
+          Text(
+            "${row['depart']} → ${row['arrive']}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
           Text(
             "${formatTime(row['depart_time'])} → ${formatTime(row['arrive_time'])}",
             style: const TextStyle(
@@ -229,7 +242,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
               color: Colors.black,
             ),
           ),
+
           const SizedBox(height: 6),
+
           Text(
             "直通（${row['vehicle']}）",
             style: const TextStyle(
@@ -242,6 +257,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ★ 乗換カード（どこ発→どこ着 追加済み）
   Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -273,6 +289,18 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ★ 追加：どこ発 → どこ着
+          Text(
+            "${row['depart']} → ${row['arrive']}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
           Row(
             children: [
               Text(
@@ -285,7 +313,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
               dot(firstColor),
             ],
           ),
+
           const SizedBox(height: 6),
+
           const Row(
             children: [
               Icon(Icons.arrow_downward, size: 20),
@@ -293,7 +323,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
               Text("乗換（学園通り駅）", style: TextStyle(fontSize: 18)),
             ],
           ),
+
           const SizedBox(height: 6),
+
           Row(
             children: [
               Text(
