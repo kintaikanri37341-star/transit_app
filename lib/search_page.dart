@@ -273,13 +273,13 @@ class _SearchPageState extends State<SearchPage> {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                const double buttonHeight = 72; // ★ 緑ボタンの高さ
+                const double buttonHeight = 72; // 緑ボタンの高さ
                 const double labelHeight = 24;
                 const double spacing = 24;
 
-                // ★ 上下中央の正しい位置
+                // ★ 視覚的に完全中央になるよう +6px 補正
                 final double swapTop =
-                    labelHeight + buttonHeight + (spacing / 2);
+                    labelHeight + buttonHeight + (spacing / 2) + 6;
 
                 return Stack(
                   children: [
@@ -333,10 +333,9 @@ class _SearchPageState extends State<SearchPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: const [
                             Icon(Icons.swap_vert,
-                                size: 20, // ★ 20px
-                                color: Colors.black),
+                                size: 20, color: Colors.black),
                             SizedBox(width: 4),
-                            Text('入替'), // ★ 太字20px
+                            Text('入替'),
                           ],
                         ),
                       ),
@@ -355,7 +354,7 @@ class _SearchPageState extends State<SearchPage> {
                     ? const Color(0xFFF8BBD0)
                     : const Color(0xFFC8E6C9),
                 foregroundColor: Colors.black,
-                minimumSize: const Size(double.infinity, 72), // ★ 高さ72px
+                minimumSize: const Size(double.infinity, 72),
                 side: BorderSide(
                   color: (depart != null && arrive != null)
                       ? const Color(0xFFC62828)
@@ -382,8 +381,7 @@ class _SearchPageState extends State<SearchPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Icon(Icons.search,
-                      size: 22, // ★ 22px
-                      color: Colors.black),
+                      size: 22, color: Colors.black),
                   SizedBox(width: 8),
                   Text('検索する'),
                 ],
