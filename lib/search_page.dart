@@ -80,7 +80,7 @@ class _SearchPageState extends State<SearchPage> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.white, // ★ 背景真っ白
+      backgroundColor: Colors.white,
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height,
       ),
@@ -88,7 +88,7 @@ class _SearchPageState extends State<SearchPage> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
-              color: Colors.white, // ★ 背景真っ白
+              color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -102,7 +102,7 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
 
-                    // ★ 検索欄フォント太字22px
+                    // ★ 検索欄：太字22px
                     TextField(
                       controller: controller,
                       style: const TextStyle(
@@ -147,7 +147,7 @@ class _SearchPageState extends State<SearchPage> {
                         child: Text(
                           '最近使った駅',
                           style: TextStyle(
-                            fontSize: 22, // ★ 太字22px
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -158,7 +158,7 @@ class _SearchPageState extends State<SearchPage> {
                             title: Text(
                               station,
                               style: const TextStyle(
-                                fontSize: 22, // ★ 太字22px
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -197,7 +197,7 @@ class _SearchPageState extends State<SearchPage> {
                             title: Text(
                               station,
                               style: const TextStyle(
-                                fontSize: 22, // ★ 太字22px
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -237,11 +237,12 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ★ 22px 太字に統一
     final baseButton = ElevatedButton.styleFrom(
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       textStyle: const TextStyle(
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -252,7 +253,7 @@ class _SearchPageState extends State<SearchPage> {
       side: const BorderSide(color: Colors.black, width: 2),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       textStyle: const TextStyle(
-        fontSize: 16,
+        fontSize: 22, // ★ 入替ボタンも22px
         fontWeight: FontWeight.bold,
       ),
     );
@@ -282,9 +283,13 @@ class _SearchPageState extends State<SearchPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text('出発駅',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        const Text(
+                          '出発駅',
+                          style: TextStyle(
+                            fontSize: 22, // ★ 22px
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         ElevatedButton(
                           style: baseButton.copyWith(
@@ -295,9 +300,13 @@ class _SearchPageState extends State<SearchPage> {
                           child: Text(depart ?? '出発駅を選択'),
                         ),
                         const SizedBox(height: spacing),
-                        const Text('到着駅',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        const Text(
+                          '到着駅',
+                          style: TextStyle(
+                            fontSize: 22, // ★ 22px
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         ElevatedButton(
                           style: baseButton.copyWith(
@@ -320,9 +329,10 @@ class _SearchPageState extends State<SearchPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: const [
                             Icon(Icons.swap_vert,
-                                size: 20, color: Colors.black),
+                                size: 22, // ★ アイコンも22px
+                                color: Colors.black),
                             SizedBox(width: 4),
-                            Text('入替'),
+                            Text('入替'), // ★ 太字22px
                           ],
                         ),
                       ),
@@ -335,25 +345,22 @@ class _SearchPageState extends State<SearchPage> {
             const SizedBox(height: 40),
 
             ElevatedButton(
-              style: (depart != null && arrive != null)
-                  ? ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF8BBD0),
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: Color(0xFFC62828), width: 3),
-                      textStyle: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC8E6C9),
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: Colors.black, width: 2),
-                      textStyle: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: (depart != null && arrive != null)
+                    ? const Color(0xFFF8BBD0)
+                    : const Color(0xFFC8E6C9),
+                foregroundColor: Colors.black,
+                side: BorderSide(
+                  color: (depart != null && arrive != null)
+                      ? const Color(0xFFC62828)
+                      : Colors.black,
+                  width: (depart != null && arrive != null) ? 3 : 2,
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 22, // ★ 22px
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onPressed: (depart != null && arrive != null)
                   ? () {
                       Navigator.push(
@@ -368,9 +375,11 @@ class _SearchPageState extends State<SearchPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.search, size: 26, color: Colors.black),
+                  Icon(Icons.search,
+                      size: 22, // ★ アイコンも22px
+                      color: Colors.black),
                   SizedBox(width: 8),
-                  Text('検索する'),
+                  Text('検索する'), // ★ 22px
                 ],
               ),
             ),
@@ -387,7 +396,7 @@ class _SearchPageState extends State<SearchPage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold, // ★ 太字
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 16),
@@ -396,7 +405,7 @@ class _SearchPageState extends State<SearchPage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold, // ★ 太字
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 16),
@@ -405,7 +414,7 @@ class _SearchPageState extends State<SearchPage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold, // ★ 太字
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
