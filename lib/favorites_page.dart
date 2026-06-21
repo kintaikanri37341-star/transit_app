@@ -14,9 +14,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
   List<Map<String, dynamic>> favorites = [];
   Map<String, dynamic>? selectedRow;
 
+  // ★ カード位置取得用
   final Map<int, GlobalKey> cardKeys = {};
   double selectedTop = 0;
 
+  // ★ アニメーション制御
   bool showOverlay = false;
   bool fadeOutList = false;
   bool fadeInMenu = false;
@@ -45,7 +47,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
     await loadFavorites();
 
-    // ★ ② 削除ポップアップ
+    // ★ 削除ポップアップ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("お気に入り便から削除しました"),
@@ -54,6 +56,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ★ カードタップ時の処理（ResultPage と同じ）
   void onSelectRow(Map row, int index) {
     final key = cardKeys[index];
     if (key == null) return;
@@ -78,6 +81,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     });
   }
 
+  // ★ 選択解除（背景・×・カードすべてで閉じる）
   void closeOverlay() {
     setState(() {
       fadeInMenu = false;
@@ -125,6 +129,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       ),
       body: Stack(
         children: [
+          // ★ ListView（フェードアウト）
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
             opacity: fadeOutList ? 0 : 1,
@@ -153,7 +158,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         child: Container(
                           key: cardKeys[index],
                           margin: const EdgeInsets.only(bottom: 16),
-                          width: double.infinity, // ★ ① 横幅を画面いっぱいに固定
+                          width: double.infinity, // ★ 横幅を画面いっぱいに固定
                           child: isDirectType
                               ? _buildDirectCard(row, vehicle)
                               : _buildMultiLegCard(row, vehicle),
@@ -163,12 +168,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   ),
           ),
 
+          // ★ 背景（真っ白）タップで閉じる
           if (showOverlay)
             GestureDetector(
               onTap: closeOverlay,
               child: Container(color: Colors.white),
             ),
 
+          // ★ 選択されたカード（元の位置 → 中央へ移動）
           if (showOverlay && selectedRow != null)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
@@ -181,6 +188,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  // ★ ×（タップで閉じる）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
@@ -199,6 +207,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     ),
                   ),
 
+                  // ★ 選択されたカード（タップで閉じる）
                   GestureDetector(
                     onTap: closeOverlay,
                     child: Builder(
@@ -219,6 +228,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
                   const SizedBox(height: 20),
 
+                  // ★ メニュー（フェードイン）
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: fadeInMenu ? 1 : 0,
@@ -273,9 +283,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ★ 直通カード（駅名22px）
   Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
-      width: double.infinity, // ★ ① 横幅を固定
+      width: double.infinity,
       decoration: BoxDecoration(
         border: Border.all(
           color: vehicleBorderColor(vehicle),
@@ -305,7 +316,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 22, // ★ 駅名22px
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -336,6 +347,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ★ 乗換カード（駅名22px）
   Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -351,7 +363,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         );
 
     return Container(
-      width: double.infinity, // ★ ① 横幅を固定
+      width: double.infinity,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black, width: 2),
         borderRadius: BorderRadius.circular(12),
@@ -371,7 +383,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           Text(
             "${row['depart']} → ${row['arrive']}",
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 22, // ★ 駅名22px
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),

@@ -80,122 +80,145 @@ class _SearchPageState extends State<SearchPage> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Colors.white, // ★ 背景真っ白
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height,
       ),
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const SizedBox.shrink(),
-                    ),
-                  ),
-                  TextField(
-                    controller: controller,
-                    style: const TextStyle(fontSize: 20),
-                    decoration: InputDecoration(
-                      labelText: '駅名を検索',
-                      labelStyle: const TextStyle(fontSize: 20),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: keyword.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                controller.clear();
-                                setModalState(() {
-                                  keyword = "";
-                                  tempList = allStations;
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    onChanged: (v) {
-                      keyword = v;
-                      setModalState(() {
-                        tempList = v.isEmpty
-                            ? allStations
-                            : allStations.where((s) => s.contains(v)).toList();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  if (recentStations.isNotEmpty) ...[
-                    const Align(
+            return Container(
+              color: Colors.white, // ★ 背景真っ白
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        '最近使った駅',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const SizedBox.shrink(),
                       ),
                     ),
-                    ...recentStations.map((station) => ListTile(
-                          leading: const Icon(Icons.history),
-                          title: Text(
-                            station,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () async {
-                              await deleteRecentStation(key, station);
-                              recentStations =
-                                  await loadRecentStations(key);
-                              setModalState(() {});
-                            },
-                          ),
-                          onTap: () async {
-                            setState(() {
-                              if (isDepart) {
-                                depart = station;
-                              } else {
-                                arrive = station;
-                              }
-                            });
 
-                            await saveRecentStation(key, station);
-                            Navigator.pop(context);
-                          },
-                        )),
-                    const Divider(),
-                  ],
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: tempList.length,
-                      itemBuilder: (_, i) {
-                        final station = tempList[i];
-                        return ListTile(
-                          title: Text(
-                            station,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                          onTap: () async {
-                            setState(() {
-                              if (isDepart) {
-                                depart = station;
-                              } else {
-                                arrive = station;
-                              }
-                            });
-
-                            await saveRecentStation(key, station);
-                            Navigator.pop(context);
-                          },
-                        );
+                    // ★ 検索欄フォント太字22px
+                    TextField(
+                      controller: controller,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: '駅名を検索',
+                        labelStyle: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: keyword.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  controller.clear();
+                                  setModalState(() {
+                                    keyword = "";
+                                    tempList = allStations;
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                      onChanged: (v) {
+                        keyword = v;
+                        setModalState(() {
+                          tempList = v.isEmpty
+                              ? allStations
+                              : allStations.where((s) => s.contains(v)).toList();
+                        });
                       },
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 16),
+
+                    if (recentStations.isNotEmpty) ...[
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '最近使った駅',
+                          style: TextStyle(
+                            fontSize: 22, // ★ 太字22px
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      ...recentStations.map((station) => ListTile(
+                            leading: const Icon(Icons.history),
+                            title: Text(
+                              station,
+                              style: const TextStyle(
+                                fontSize: 22, // ★ 太字22px
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () async {
+                                await deleteRecentStation(key, station);
+                                recentStations =
+                                    await loadRecentStations(key);
+                                setModalState(() {});
+                              },
+                            ),
+                            onTap: () async {
+                              setState(() {
+                                if (isDepart) {
+                                  depart = station;
+                                } else {
+                                  arrive = station;
+                                }
+                              });
+
+                              await saveRecentStation(key, station);
+                              Navigator.pop(context);
+                            },
+                          )),
+
+                      const Divider(),
+                    ],
+
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: tempList.length,
+                        itemBuilder: (_, i) {
+                          final station = tempList[i];
+                          return ListTile(
+                            title: Text(
+                              station,
+                              style: const TextStyle(
+                                fontSize: 22, // ★ 太字22px
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onTap: () async {
+                              setState(() {
+                                if (isDepart) {
+                                  depart = station;
+                                } else {
+                                  arrive = station;
+                                }
+                              });
+
+                              await saveRecentStation(key, station);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -245,14 +268,12 @@ class _SearchPageState extends State<SearchPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ★ 入替ボタンの正しい配置
             LayoutBuilder(
               builder: (context, constraints) {
                 const double buttonHeight = 56;
                 const double labelHeight = 24;
                 const double spacing = 24;
 
-                // 2つのボタンの間の中央
                 final double swapTop =
                     labelHeight + buttonHeight + (spacing / 2) - 10;
 
@@ -289,7 +310,6 @@ class _SearchPageState extends State<SearchPage> {
                       ],
                     ),
 
-                    // ★ 2つのボタンの「間」の上下中央・右端に入替ボタン
                     Positioned(
                       right: 0,
                       top: swapTop,
@@ -314,7 +334,6 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 40),
 
-            // ★ 検索ボタン（黒枠 → 条件満たしたら赤枠）
             ElevatedButton(
               style: (depart != null && arrive != null)
                   ? ElevatedButton.styleFrom(
@@ -358,28 +377,36 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 40),
 
-            // ★ 注意書き3文（復活）
             Expanded(
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: const [
                     Text(
-                      '日曜日・祝日・年末年始は運休です。',
+                      '日曜日・祝日・年末年始は\n運休です。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold, // ★ 太字
+                      ),
                     ),
                     SizedBox(height: 16),
                     Text(
-                      '交通状況により、到着時間が遅れることがあります。',
+                      '交通状況により、到着時間が\n遅れることがあります。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold, // ★ 太字
+                      ),
                     ),
                     SizedBox(height: 16),
                     Text(
                       'あらかじめご承知おきください。',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold, // ★ 太字
+                      ),
                     ),
                   ],
                 ),
