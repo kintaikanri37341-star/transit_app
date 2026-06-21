@@ -101,12 +101,12 @@ class _ResultPageState extends State<ResultPage> {
   // ★ メニュー表示（①②③④すべて反映）
   void showTripMenu(Map row) {
     setState(() {
-      selectedRow = row; // ① 選択した便だけ表示
+      selectedRow = Map<String, dynamic>.from(row); // ★ 型エラー修正
     });
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // ② 背景暗転を消す
+      isScrollControlled: true, // ② 暗転しない
       barrierColor: Colors.transparent, // ② 暗くしない
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -158,9 +158,8 @@ class _ResultPageState extends State<ResultPage> {
         );
       },
     ).whenComplete(() {
-      // メニューを閉じたら一覧に戻す
       setState(() {
-        selectedRow = null;
+        selectedRow = null; // ① 一覧に戻す
       });
     });
   }
@@ -236,7 +235,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ 直通カード（元のまま）
+  // ★ 直通カード（背景画像修正済み）
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
@@ -256,8 +255,8 @@ class _ResultPageState extends State<ResultPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.7),
-            BlendMode.srcATop,
+            Colors.white.withOpacity(0.35), // ★ 背景が見える最適値
+            BlendMode.dstATop,              // ★ 画像を隠さない
           ),
         ),
       ),
@@ -299,7 +298,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ 乗換カード（元のまま）
+  // ★ 乗換カード（背景画像なし）
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -308,13 +307,10 @@ class _ResultPageState extends State<ResultPage> {
     final firstColor = vehicleBorderColor(firstVehicle);
     final secondColor = vehicleBorderColor(secondVehicle);
 
-    Widget colorDot(Color c) => Container(
+    Widget dot(Color c) => Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: c,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
         );
 
     return Container(
@@ -338,61 +334,33 @@ class _ResultPageState extends State<ResultPage> {
             children: [
               Text(
                 "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              Text(
-                firstVehicle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text(firstVehicle, style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 6),
-              colorDot(firstColor),
+              dot(firstColor),
             ],
           ),
-
           const SizedBox(height: 6),
-
           const Row(
             children: [
-              Icon(Icons.arrow_downward, size: 20, color: Colors.black),
+              Icon(Icons.arrow_downward, size: 20),
               SizedBox(width: 4),
-              Text(
-                "乗換（学園通り駅）",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text("乗換（学園通り駅）", style: TextStyle(fontSize: 18)),
             ],
           ),
-
           const SizedBox(height: 6),
-
           Row(
             children: [
               Text(
                 "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              Text(
-                secondVehicle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text(secondVehicle, style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 6),
-              colorDot(secondColor),
+              dot(secondColor),
             ],
           ),
         ],

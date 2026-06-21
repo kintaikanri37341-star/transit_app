@@ -12,7 +12,7 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   List<Map<String, dynamic>> favorites = [];
-  Map<String, dynamic>? selectedRow; // ★ ① 選択中の便
+  Map<String, dynamic>? selectedRow;
 
   @override
   void initState() {
@@ -25,7 +25,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final list = prefs.getStringList("favorites") ?? [];
 
     setState(() {
-      favorites = list.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+      favorites = list.map((e) => Map<String, dynamic>.from(jsonDecode(e))).toList();
     });
   }
 
@@ -39,27 +39,16 @@ class _FavoritesPageState extends State<FavoritesPage> {
     await loadFavorites();
   }
 
-  // ★ ④ お気に入り追加ポップ
-  void showAddedPopup() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("お気に入り便に追加しました"),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
-  // ★ メニュー表示（①②③④すべて反映）
   void showTripMenu(Map row) {
     setState(() {
-      selectedRow = row; // ① 選択した便だけ表示
+      selectedRow = Map<String, dynamic>.from(row);
     });
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // ② 背景暗転を消す
+      isScrollControlled: true,
+      barrierColor: Colors.transparent,
       backgroundColor: Colors.white,
-      barrierColor: Colors.transparent, // ② 暗くしない
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -71,7 +60,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             children: [
               _menuItem(
                 icon: Icons.alarm,
-                text: "アラームを設定する", // ③ 文言変更
+                text: "アラームを設定する",
                 onTap: () {
                   Navigator.pop(context);
                 },
@@ -108,7 +97,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
         );
       },
     ).whenComplete(() {
-      // メニューを閉じたら一覧に戻す
       setState(() {
         selectedRow = null;
       });
@@ -150,11 +138,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   String bgImage(String vehicle) {
-    if (vehicle.contains("舞")) {
-      return "assets/images/maichan.jpg";
-    } else {
-      return "assets/images/sachichan.jpg";
-    }
+    if (vehicle.contains("舞")) return "assets/images/maichan.jpg";
+    return "assets/images/sachichan.jpg";
   }
 
   String formatTime(String? t) {
@@ -165,7 +150,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     final listToShow =
-        selectedRow != null ? [selectedRow!] : favorites; // ★ ① 選択中は1件だけ表示
+        selectedRow != null ? [selectedRow!] : favorites;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -199,8 +184,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     child: isDirectType
-                        ? _buildDirectCard(row, vehicle, routeType)
-                        : _buildMultiLegCard(row, vehicle, routeType),
+                        ? _buildDirectCard(row, vehicle)
+                        : _buildMultiLegCard(row, vehicle),
                   ),
                 );
               },
@@ -208,7 +193,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  Widget _buildDirectCard(Map row, String vehicle, String routeType) {
+  Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -227,8 +212,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.7),
-            BlendMode.srcATop,
+            Colors.white.withOpacity(0.35),
+            BlendMode.dstATop,
           ),
         ),
       ),
@@ -257,7 +242,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
+  Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
     final secondVehicle = parts[1];
@@ -265,13 +250,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final firstColor = vehicleBorderColor(firstVehicle);
     final secondColor = vehicleBorderColor(secondVehicle);
 
-    Widget colorDot(Color c) => Container(
+    Widget dot(Color c) => Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: c,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
         );
 
     return Container(
@@ -295,61 +277,33 @@ class _FavoritesPageState extends State<FavoritesPage> {
             children: [
               Text(
                 "${formatTime(row['depart_time'])} → ${formatTime(row['first_arrive_time'])}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              Text(
-                firstVehicle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text(firstVehicle, style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 6),
-              colorDot(firstColor),
+              dot(firstColor),
             ],
           ),
-
           const SizedBox(height: 6),
-
           const Row(
             children: [
-              Icon(Icons.arrow_downward, size: 20, color: Colors.black),
+              Icon(Icons.arrow_downward, size: 20),
               SizedBox(width: 4),
-              Text(
-                "乗換（学園通り駅）",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text("乗換（学園通り駅）", style: TextStyle(fontSize: 18)),
             ],
           ),
-
           const SizedBox(height: 6),
-
           Row(
             children: [
               Text(
                 "${formatTime(row['second_depart_time'])} → ${formatTime(row['arrive_time'])}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              Text(
-                secondVehicle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              Text(secondVehicle, style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 6),
-              colorDot(secondColor),
+              dot(secondColor),
             ],
           ),
         ],
