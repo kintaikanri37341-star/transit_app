@@ -24,6 +24,7 @@ class _ResultPageState extends State<ResultPage> {
   bool loading = true;
 
   Map<String, dynamic>? selectedRow;
+  bool showOverlay = false;
 
   @override
   void initState() {
@@ -80,14 +81,11 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  // ★ お気に入り保存（駅名を裏で埋め込む）
   Future<void> saveFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> list = prefs.getStringList("favorites") ?? [];
 
     final newRow = Map<String, dynamic>.from(row);
-
-    // ★ ここで駅名を埋め込む（ResultPage では表示しないが Favorites で使う）
     newRow['depart'] = widget.depart;
     newRow['arrive'] = widget.arrive;
 
@@ -104,76 +102,133 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  void showTripMenu(Map row) {
+  void onSelectRow(Map row) {
     setState(() {
       selectedRow = Map<String, dynamic>.from(row);
-    });
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      barrierColor: Colors.transparent,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _menuItem(
-                icon: Icons.alarm,
-                text: "アラームを設定する",
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-
-              const SizedBox(height: 22),
-
-              _menuItem(
-                icon: Icons.route,
-                text: "経路・時刻の詳細を見る",
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RouteDetailPage(row: row),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 22),
-
-              _menuItem(
-                icon: Icons.star,
-                text: "お気に入り便に追加する",
-                onTap: () async {
-                  await saveFavorite(row);
-                  Navigator.pop(context);
-                  showAddedPopup();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    ).whenComplete(() {
-      setState(() {
-        selectedRow = null;
-      });
+      showOverlay = true;
     });
   }
 
-  Widget _menuItem({
-    required IconData icon,
-    required String text,
-    required VoidCallback onTap,
-  }) {
+  void closeOverlay() {
+    setState(() {
+      showOverlay = false;
+      selectedRow = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final listToShow = results;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("${widget.depart} → ${widget.arrive}"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: Stack(
+        children: [
+          loading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: listToShow.length,
+                  itemBuilder: (context, index) {
+                    final row = listToShow[index];
+                    final routeType = row['route_type'] as String;
+                    final vehicle = row['vehicle'] as String;
+
+                    final isDirectType =
+                        routeType == "direct" || routeType == "direct_stopover";
+
+                    return GestureDetector(
+                      onTap: () => onSelectRow(row),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: isDirectType
+                            ? _buildDirectCard(row, vehicle, routeType)
+                            : _buildMultiLegCard(row, vehicle, routeType),
+                      ),
+                    );
+                  },
+                ),
+
+          // ★ オーバーレイ（中央に移動するカード）
+          if (showOverlay && selectedRow != null)
+            GestureDetector(
+              onTap: closeOverlay,
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+              ),
+            ),
+
+          if (showOverlay && selectedRow != null)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              top: MediaQuery.of(context).size.height * 0.22,
+              left: 16,
+              right: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // ★ × マーク（飾り）
+                  const Padding(
+                    padding: EdgeInsets.only(right: 4, bottom: 8),
+                    child: Text(
+                      "×",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // ★ 選択された便カード
+                  Builder(
+                    builder: (_) {
+                      final row = selectedRow!;
+                      final routeType = row['route_type'] as String;
+                      final vehicle = row['vehicle'] as String;
+
+                      final isDirectType =
+                          routeType == "direct" || routeType == "direct_stopover";
+
+                      return isDirectType
+                          ? _buildDirectCard(row, vehicle, routeType)
+                          : _buildMultiLegCard(row, vehicle, routeType);
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ★ メニュー3つ（中央のカードの直下）
+                  _menuButton("アラームを設定する", Icons.alarm, () {}),
+                  const SizedBox(height: 22),
+                  _menuButton("経路・時刻の詳細を見る", Icons.route, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RouteDetailPage(row: selectedRow!),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 22),
+                  _menuButton("お気に入り便に追加する", Icons.star, () async {
+                    await saveFavorite(selectedRow!);
+                    showAddedPopup();
+                    closeOverlay();
+                  }),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menuButton(String text, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Row(
@@ -185,57 +240,14 @@ class _ResultPageState extends State<ResultPage> {
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              softWrap: false,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final listToShow =
-        selectedRow != null ? [selectedRow!] : results;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("${widget.depart} → ${widget.arrive}"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: listToShow.length,
-              itemBuilder: (context, index) {
-                final row = listToShow[index];
-                final routeType = row['route_type'] as String;
-                final vehicle = row['vehicle'] as String;
-
-                final isDirectType =
-                    routeType == "direct" || routeType == "direct_stopover";
-
-                return GestureDetector(
-                  onTap: () {
-                    showTripMenu(row);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: isDirectType
-                        ? _buildDirectCard(row, vehicle, routeType)
-                        : _buildMultiLegCard(row, vehicle, routeType),
-                  ),
-                );
-              },
-            ),
     );
   }
 
@@ -273,7 +285,6 @@ class _ResultPageState extends State<ResultPage> {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
             ),
           ),
 
@@ -285,7 +296,6 @@ class _ResultPageState extends State<ResultPage> {
                 routeLabel(routeType, vehicle),
                 style: const TextStyle(
                   fontSize: 18,
-                  color: Colors.black,
                 ),
               ),
 
