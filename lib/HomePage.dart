@@ -152,12 +152,13 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
 
-                        // ★★★ ここだけ変更 ★★★
+                        // ★★★ ここだけ変更（名前＋色＋内部余白）★★★
                         Expanded(
                           child: _menuButton(
-                            color: const Color(0xFFFFCC80), // ← オレンジ色
+                            color: const Color(0xFFFFCC80), // オレンジ
                             icon: Icons.stars,
-                            text: "お気に入り\n便", // ← 名前変更
+                            text: "お気に入り便", // ← 改行なし
+                            padding: const EdgeInsets.symmetric(vertical: 6), // ← 内部余白を小さく
                             onTap: () {},
                           ),
                         ),
@@ -190,10 +191,12 @@ class HomePage extends StatelessWidget {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(vertical: 12), // ★ デフォルト余白
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
+        padding: padding, // ★ ここに適用
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16),
