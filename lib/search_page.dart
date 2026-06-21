@@ -273,12 +273,13 @@ class _SearchPageState extends State<SearchPage> {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                const double buttonHeight = 72; // ★ 高さ72pxに合わせる
+                const double buttonHeight = 72; // ★ 緑ボタンの高さ
                 const double labelHeight = 24;
                 const double spacing = 24;
 
+                // ★ 上下中央の正しい位置
                 final double swapTop =
-                    labelHeight + buttonHeight + (spacing / 2) - 10;
+                    labelHeight + buttonHeight + (spacing / 2);
 
                 return Stack(
                   children: [
@@ -321,6 +322,7 @@ class _SearchPageState extends State<SearchPage> {
                       ],
                     ),
 
+                    // ★ 入替ボタン（上下中央・右端）
                     Positioned(
                       right: 0,
                       top: swapTop,
