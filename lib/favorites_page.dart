@@ -212,8 +212,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.35),
-            BlendMode.dstATop,
+            Colors.white.withOpacity(0.18), // ★ 鮮やかさ復活
+            BlendMode.srcATop,              // ★ Web で暗くならない
           ),
         ),
       ),
