@@ -23,7 +23,7 @@ class _ResultPageState extends State<ResultPage> {
   List<dynamic> results = [];
   bool loading = true;
 
-  Map<String, dynamic>? selectedRow;
+  Map<String, dynamic>? selectedRow; // ★ ① 選択中の便
 
   @override
   void initState() {
@@ -80,18 +80,6 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  String middleLabel(String routeType) {
-    switch (routeType) {
-      case "midday":
-        return "昼休憩後出発\n（同一車両）";
-      case "detour":
-        return "他コース周回後出発\n（同一車両）";
-      case "transfer":
-      default:
-        return "乗換";
-    }
-  }
-
   // ★ お気に入り保存
   Future<void> saveFavorite(Map row) async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,11 +88,27 @@ class _ResultPageState extends State<ResultPage> {
     await prefs.setStringList("favorites", list);
   }
 
-  // ★ メニュー表示（あなたの要望をすべて反映）
+  // ★ ④ お気に入り追加ポップ
+  void showAddedPopup() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("お気に入り便に追加しました"),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // ★ メニュー表示（①②③④すべて反映）
   void showTripMenu(Map row) {
+    setState(() {
+      selectedRow = row; // ① 選択した便だけ表示
+    });
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white, // 背景は真っ白
+      isScrollControlled: true, // ② 背景暗転を消す
+      barrierColor: Colors.transparent, // ② 暗くしない
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -114,10 +118,9 @@ class _ResultPageState extends State<ResultPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ① 出発10分前に音で通知する
               _menuItem(
                 icon: Icons.alarm,
-                text: "出発10分前に音で通知する",
+                text: "アラームを設定する", // ③ 文言変更
                 onTap: () {
                   Navigator.pop(context);
                 },
@@ -125,7 +128,6 @@ class _ResultPageState extends State<ResultPage> {
 
               const SizedBox(height: 22),
 
-              // ② 経路・時刻の詳細を見る
               _menuItem(
                 icon: Icons.route,
                 text: "経路・時刻の詳細を見る",
@@ -142,23 +144,28 @@ class _ResultPageState extends State<ResultPage> {
 
               const SizedBox(height: 22),
 
-              // ③ お気に入り便に追加する
               _menuItem(
                 icon: Icons.star,
                 text: "お気に入り便に追加する",
                 onTap: () async {
                   await saveFavorite(row);
                   Navigator.pop(context);
+                  showAddedPopup(); // ④ ポップ表示
                 },
               ),
             ],
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      // メニューを閉じたら一覧に戻す
+      setState(() {
+        selectedRow = null;
+      });
+    });
   }
 
-  // ★ メニューアイテム（太字・22px・縮小して1行に収める）
+  // ★ メニューアイテム（太字・22px・1行）
   Widget _menuItem({
     required IconData icon,
     required String text,
@@ -190,6 +197,9 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final listToShow =
+        selectedRow != null ? [selectedRow!] : results; // ★ ① 選択中は1件だけ表示
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -201,9 +211,9 @@ class _ResultPageState extends State<ResultPage> {
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: results.length,
+              itemCount: listToShow.length,
               itemBuilder: (context, index) {
-                final row = results[index];
+                final row = listToShow[index];
                 final routeType = row['route_type'] as String;
                 final vehicle = row['vehicle'] as String;
 
@@ -212,9 +222,6 @@ class _ResultPageState extends State<ResultPage> {
 
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      selectedRow = row;
-                    });
                     showTripMenu(row);
                   },
                   child: Container(
@@ -351,11 +358,11 @@ class _ResultPageState extends State<ResultPage> {
 
           const SizedBox(height: 6),
 
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.arrow_downward, size: 20, color: Colors.black),
-              const SizedBox(width: 4),
-              const Text(
+              Icon(Icons.arrow_downward, size: 20, color: Colors.black),
+              SizedBox(width: 4),
+              Text(
                 "乗換（学園通り駅）",
                 style: TextStyle(
                   fontSize: 18,

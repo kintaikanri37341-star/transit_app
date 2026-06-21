@@ -12,6 +12,7 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   List<Map<String, dynamic>> favorites = [];
+  Map<String, dynamic>? selectedRow; // ★ ① 選択中の便
 
   @override
   void initState() {
@@ -38,10 +39,27 @@ class _FavoritesPageState extends State<FavoritesPage> {
     await loadFavorites();
   }
 
+  // ★ ④ お気に入り追加ポップ
+  void showAddedPopup() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("お気に入り便に追加しました"),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // ★ メニュー表示（①②③④すべて反映）
   void showTripMenu(Map row) {
+    setState(() {
+      selectedRow = row; // ① 選択した便だけ表示
+    });
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // ② 背景暗転を消す
       backgroundColor: Colors.white,
+      barrierColor: Colors.transparent, // ② 暗くしない
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -53,7 +71,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             children: [
               _menuItem(
                 icon: Icons.alarm,
-                text: "出発10分前に音で通知する",
+                text: "アラームを設定する", // ③ 文言変更
                 onTap: () {
                   Navigator.pop(context);
                 },
@@ -89,7 +107,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      // メニューを閉じたら一覧に戻す
+      setState(() {
+        selectedRow = null;
+      });
+    });
   }
 
   Widget _menuItem({
@@ -141,6 +164,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final listToShow =
+        selectedRow != null ? [selectedRow!] : favorites; // ★ ① 選択中は1件だけ表示
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -148,7 +174,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: favorites.isEmpty
+      body: listToShow.isEmpty
           ? const Center(
               child: Text(
                 "お気に入り便はありません",
@@ -157,9 +183,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: favorites.length,
+              itemCount: listToShow.length,
               itemBuilder: (context, index) {
-                final row = favorites[index];
+                final row = listToShow[index];
                 final routeType = row['route_type'] as String;
                 final vehicle = row['vehicle'] as String;
 
