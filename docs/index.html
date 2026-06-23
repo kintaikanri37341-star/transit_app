@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <base href="/transit_app/">
+    <!-- Flutter が GitHub Pages / サブディレクトリ用に自動書き換えする必須タグ -->
+    <base href="/">
 
     <meta charset="UTF-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="三木町コミュニティバスアプリ">
 
+    <!-- PWA 対応 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="white">
     <meta name="apple-mobile-web-app-title" content="三木町バス">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- Flutter がビルド時に自動でパスを書き換えるアイコン類 -->
     <link rel="apple-touch-icon" href="icons/Icon-192.png">
     <link rel="apple-touch-startup-image" href="icons/splash.png">
 
@@ -21,14 +24,8 @@
   </head>
 
   <body>
+    <!-- Flutter Web 起動スクリプト（Flutter が自動で書き換える） -->
     <script src="flutter.js" defer></script>
     <script src="main.dart.js" defer></script>
-
-    <!-- ★ これを追加するだけで固定 SW が有効になる -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service_worker.js');
-      }
-    </script>
   </body>
 </html>
