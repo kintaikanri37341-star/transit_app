@@ -134,7 +134,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.white.withOpacity(0.7),
-              BlendMode.srcOver,   // ★ 修正①
+              BlendMode.srcATop,   // ★ 修正①
             ),
           ),
         ),
@@ -178,7 +178,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.white.withOpacity(0.7),
-                      BlendMode.srcOver,   // ★ 修正②
+                      BlendMode.srcATop,   // ★ 修正②
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -220,7 +220,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.white.withOpacity(0.7),
-                      BlendMode.srcOver,   // ★ 修正③
+                      BlendMode.srcATop,   // ★ 修正③
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(

@@ -443,7 +443,7 @@ class _ResultPageState extends State<ResultPage> {
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
             Colors.white.withOpacity(0.18),
-            BlendMode.srcOver,   // ★ 修正点：ここだけ変更
+            BlendMode.srcATop,   // ★ 最小修正：ここだけ変更
           ),
         ),
       ),
