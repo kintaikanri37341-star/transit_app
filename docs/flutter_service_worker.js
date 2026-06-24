@@ -21,7 +21,7 @@ const RESOURCES = {"icons/splash.png": "0250706ec891e75bc9e7ab698ecc516f",
 "canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
 "canvaskit/canvaskit.wasm": "3d2a2d663e8c5111ac61a46367f751ac",
 "canvaskit/skwasm.wasm": "e42815763c5d05bba43f9d0337fa7d84",
-"main.dart.js": "bffb35d2c248924426bcae106fa4282f",
+"main.dart.js": "75bf4bafda89562b740be6f91e54e125",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "assets/AssetManifest.bin": "46a2df9a7c810580708af8c2dad28464",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "e986ebe42ef785b27164c36a9abc7818",
@@ -43,8 +43,8 @@ const RESOURCES = {"icons/splash.png": "0250706ec891e75bc9e7ab698ecc516f",
 "assets/assets/fonts/NotoSansJP-Medium.ttf": "9baf41ab9a20ebd9a40fc317b989bd34",
 "assets/assets/fonts/NotoSansJP-Bold.ttf": "4e7d3ef67c05e1e313fccc82b3e9d739",
 "assets/assets/fonts/NotoSansJP-Regular.ttf": "65fbbfe1bda810bed173daf97478019c",
-"index.html": "16dbbb1b7982ef171bbe946dfc8c504d",
-"/": "16dbbb1b7982ef171bbe946dfc8c504d"};
+"index.html": "14507abbe252ea7d586f8386c3ccc962",
+"/": "14507abbe252ea7d586f8386c3ccc962"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",

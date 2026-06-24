@@ -134,7 +134,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.white.withOpacity(0.7),
-              BlendMode.srcATop,
+              BlendMode.srcOver,   // ★ 修正①
             ),
           ),
         ),
@@ -178,7 +178,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.white.withOpacity(0.7),
-                      BlendMode.srcATop,
+                      BlendMode.srcOver,   // ★ 修正②
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -220,7 +220,7 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.white.withOpacity(0.7),
-                      BlendMode.srcATop,
+                      BlendMode.srcOver,   // ★ 修正③
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -293,10 +293,9 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
           'isStopover': false,
         });
         afterStopover = false;
-        // ← continue しない。到着駅も追加するために fall-through する
       }
 
-      // ★ 通常の到着駅追加（停留後1つ目の駅もここで必ず追加される）
+      // ★ 通常の到着駅追加
       items.add({
         'station': e['arrive_station'],
         'time': e['arrive_time'],
