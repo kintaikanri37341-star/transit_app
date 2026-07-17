@@ -373,6 +373,8 @@ class _ResultPageState extends State<ResultPage> {
                         const SizedBox(height: 22),
 
                         _menuButton("経路・時刻の詳細を見る", Icons.route, () {
+                          print("FAVORITE ROW: $selectedRow");   // ★ 追加ログ
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
