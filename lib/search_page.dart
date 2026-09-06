@@ -240,11 +240,12 @@ class _SearchPageState extends State<SearchPage> {
       borderRadius: BorderRadius.circular(12),
     );
 
+    // 出発・到着ボタンの右端を入替ボタンに干渉させないため width を固定
     final baseButton = ElevatedButton.styleFrom(
       foregroundColor: Colors.black,
       backgroundColor: const Color(0xFFC8E6C9),
       side: const BorderSide(color: Colors.black, width: 2),
-      minimumSize: const Size(double.infinity, 72),
+      minimumSize: const Size(300, 72), // ← 横幅を固定して右端まで伸びないようにする
       shape: rounded,
       textStyle: const TextStyle(
         fontSize: 22,
@@ -252,16 +253,16 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
 
-    // 🔥 ここが今回の修正：縦長＋文字入りの入替ボタン
+    // 🔥 入替ボタン：縦長＋白色＋文字入り
     final swapButtonStyle = ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFFF59D),
+      backgroundColor: Colors.white, // ← 白色に変更
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      minimumSize: const Size(60, 90),
+      minimumSize: const Size(60, 100), // ← 縦長にする
       textStyle: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
@@ -290,7 +291,7 @@ class _SearchPageState extends State<SearchPage> {
                 return Stack(
                   children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ElevatedButton(
                           style: baseButton,
@@ -348,7 +349,7 @@ class _SearchPageState extends State<SearchPage> {
                       ],
                     ),
 
-                    // 🔥 ここが今回の修正：縦長入替ボタン
+                    // 🔥 入替ボタン（縦長・白色）
                     Positioned(
                       right: 0,
                       top: swapTop,
@@ -438,7 +439,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'あらかじめご承知おきください。',
+                      'あらかじめご了承ください。',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,
