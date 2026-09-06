@@ -30,7 +30,6 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     final row = widget.row;
     final type = row['route_type'];
 
-    // ① 直通（direct / direct_stopover）
     if (type == "direct" || type == "direct_stopover") {
       final res = await supabase
           .from('trips_adjacent')
@@ -48,7 +47,6 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       return;
     }
 
-    // ② 乗換（transfer / detour / midday）
     final vehicles = (row['vehicle'] as String).split("→");
     final firstVehicle = vehicles[0];
     final secondVehicle = vehicles[1];
@@ -83,6 +81,12 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
       ];
       loading = false;
     });
+  }
+
+  // 背景色（舞ちゃん＝ピンク、幸ちゃん＝青）
+  Color vehicleBgColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFFFE4E1);
+    return const Color(0xFFE0F0FF);
   }
 
   String bgImage(String vehicle) {
@@ -129,12 +133,13 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     if (type == "direct" || type == "direct_stopover") {
       return Container(
         decoration: BoxDecoration(
+          color: vehicleBgColor(row['vehicle']), // ★ 背景色を設定
           image: DecorationImage(
             image: AssetImage(bgImage(row['vehicle'])),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.white.withOpacity(0.7),
-              BlendMode.srcATop,   // ★ 修正①
+              Colors.white.withOpacity(0.15), // ★ 画像を薄くするだけ
+              BlendMode.dstATop,              // ★ 背景色を殺さない
             ),
           ),
         ),
@@ -173,12 +178,13 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
               // 前半便
               Container(
                 decoration: BoxDecoration(
+                  color: vehicleBgColor(firstVehicle), // ★ 背景色
                   image: DecorationImage(
                     image: AssetImage(bgImage(firstVehicle)),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Colors.white.withOpacity(0.7),
-                      BlendMode.srcATop,   // ★ 修正②
+                      Colors.white.withOpacity(0.15),
+                      BlendMode.dstATop, // ★ 修正
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -215,12 +221,13 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
               // 後半便
               Container(
                 decoration: BoxDecoration(
+                  color: vehicleBgColor(secondVehicle), // ★ 背景色
                   image: DecorationImage(
                     image: AssetImage(bgImage(secondVehicle)),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Colors.white.withOpacity(0.7),
-                      BlendMode.srcATop,   // ★ 修正③
+                      Colors.white.withOpacity(0.15),
+                      BlendMode.dstATop, // ★ 修正
                     ),
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -259,10 +266,8 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
     while (i < edges.length) {
       final e = edges[i];
 
-      // ★ 停留開始（学園通り駅→学園通り駅）
       if (e['depart_station'] == '学園通り駅' &&
           e['arrive_station'] == '学園通り駅') {
-        // 停留前の「学園通り駅 発」を削除
         if (items.isNotEmpty) {
           final last = items.last;
           if (last['station'] == '学園通り駅' && last['label'] == '発') {
@@ -284,7 +289,6 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
 
       final isLast = (i == edges.length - 1);
 
-      // ★ 停留終了直後の「学園通り駅 発」
       if (afterStopover && e['depart_station'] == '学園通り駅') {
         items.add({
           'station': '学園通り駅',
@@ -295,7 +299,6 @@ class _RouteDetailPageState extends State<RouteDetailPage> {
         afterStopover = false;
       }
 
-      // ★ 通常の到着駅追加
       items.add({
         'station': e['arrive_station'],
         'time': e['arrive_time'],
