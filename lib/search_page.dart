@@ -101,7 +101,6 @@ class _SearchPageState extends State<SearchPage> {
                         label: const SizedBox.shrink(),
                       ),
                     ),
-
                     TextField(
                       controller: controller,
                       style: const TextStyle(
@@ -137,9 +136,7 @@ class _SearchPageState extends State<SearchPage> {
                         });
                       },
                     ),
-
                     const SizedBox(height: 16),
-
                     if (recentStations.isNotEmpty) ...[
                       const Align(
                         alignment: Alignment.centerLeft,
@@ -151,7 +148,6 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         ),
                       ),
-
                       ...recentStations.map((station) => ListTile(
                             leading: const Icon(Icons.history),
                             title: Text(
@@ -178,15 +174,12 @@ class _SearchPageState extends State<SearchPage> {
                                   arrive = station;
                                 }
                               });
-
                               await saveRecentStation(key, station);
                               Navigator.pop(context);
                             },
                           )),
-
                       const Divider(),
                     ],
-
                     Expanded(
                       child: ListView.builder(
                         itemCount: tempList.length,
@@ -208,7 +201,6 @@ class _SearchPageState extends State<SearchPage> {
                                   arrive = station;
                                 }
                               });
-
                               await saveRecentStation(key, station);
                               Navigator.pop(context);
                             },
@@ -240,12 +232,11 @@ class _SearchPageState extends State<SearchPage> {
       borderRadius: BorderRadius.circular(12),
     );
 
-    // 出発・到着ボタンの右端を入替ボタンに干渉させないため width を固定
     final baseButton = ElevatedButton.styleFrom(
       foregroundColor: Colors.black,
       backgroundColor: const Color(0xFFC8E6C9),
       side: const BorderSide(color: Colors.black, width: 2),
-      minimumSize: const Size(300, 72), // ← 横幅を固定して右端まで伸びないようにする
+      minimumSize: const Size(double.infinity, 72),
       shape: rounded,
       textStyle: const TextStyle(
         fontSize: 22,
@@ -253,18 +244,18 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
 
-    // 🔥 入替ボタン：縦長＋白色＋文字入り
+    // 入替ボタン（縦長・白・独立）
     final swapButtonStyle = ElevatedButton.styleFrom(
-      backgroundColor: Colors.white, // ← 白色に変更
+      backgroundColor: Colors.white,
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      minimumSize: const Size(60, 100), // ← 縦長にする
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      minimumSize: const Size(64, 96),
       textStyle: const TextStyle(
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -280,95 +271,89 @@ class _SearchPageState extends State<SearchPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                const double buttonHeight = 72;
-                const double spacing = 24;
-
-                final double swapTop =
-                    buttonHeight + (spacing / 2);
-
-                return Stack(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ElevatedButton(
-                          style: baseButton,
-                          onPressed: () => openStationSelector(true),
-                          child: Row(
-                            children: [
-                              const Text(
-                                '出発駅：',
-                                style: TextStyle(
+            // 出発・到着ボタンと入替ボタンを左右に分ける
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 左側：出発・到着ボタン（縦に並ぶ）
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ElevatedButton(
+                        style: baseButton,
+                        onPressed: () => openStationSelector(true),
+                        child: Row(
+                          children: [
+                            const Text(
+                              '出発駅：',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                depart ?? '出発駅を選択',
+                                style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  depart ?? '出発駅を選択',
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: spacing),
-
-                        ElevatedButton(
-                          style: baseButton,
-                          onPressed: () => openStationSelector(false),
-                          child: Row(
-                            children: [
-                              const Text(
-                                '到着駅：',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  arrive ?? '到着駅を選択',
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // 🔥 入替ボタン（縦長・白色）
-                    Positioned(
-                      right: 0,
-                      top: swapTop,
-                      child: ElevatedButton(
-                        style: swapButtonStyle,
-                        onPressed: _swapStations,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.swap_vert, size: 28, color: Colors.black),
-                            SizedBox(height: 4),
-                            Text('入替'),
+                            ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        style: baseButton,
+                        onPressed: () => openStationSelector(false),
+                        child: Row(
+                          children: [
+                            const Text(
+                              '到着駅：',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                arrive ?? '到着駅を選択',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 右側：縦長の入替ボタン（2つのボタンの真ん中に来るように）
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: swapButtonStyle,
+                      onPressed: _swapStations,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.swap_vert, size: 28, color: Colors.black),
+                          SizedBox(height: 4),
+                          Text('入替'),
+                        ],
+                      ),
                     ),
                   ],
-                );
-              },
+                ),
+              ],
             ),
 
             const SizedBox(height: 40),
