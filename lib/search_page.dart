@@ -252,14 +252,18 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
 
+    // 🔥 ここが今回の修正：縦長＋文字入りの入替ボタン
     final swapButtonStyle = ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFFF59D),
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
-      shape: rounded,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      minimumSize: const Size(60, 90),
       textStyle: const TextStyle(
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -344,14 +348,21 @@ class _SearchPageState extends State<SearchPage> {
                       ],
                     ),
 
+                    // 🔥 ここが今回の修正：縦長入替ボタン
                     Positioned(
                       right: 0,
                       top: swapTop,
                       child: ElevatedButton(
                         style: swapButtonStyle,
                         onPressed: _swapStations,
-                        child: const Icon(Icons.swap_vert,
-                            size: 24, color: Colors.black),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.swap_vert, size: 28, color: Colors.black),
+                            SizedBox(height: 4),
+                            Text('入替'),
+                          ],
+                        ),
                       ),
                     ),
                   ],
