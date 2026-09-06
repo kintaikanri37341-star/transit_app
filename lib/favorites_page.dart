@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:html' as html; // ★ 追加
 import 'route_detail_page.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -15,31 +14,17 @@ class _FavoritesPageState extends State<FavoritesPage> {
   List<Map<String, dynamic>> favorites = [];
   Map<String, dynamic>? selectedRow;
 
-  // ★ カード位置取得用
   final Map<int, GlobalKey> cardKeys = {};
   double selectedTop = 0;
 
-  // ★ アニメーション制御
   bool showOverlay = false;
   bool fadeOutList = false;
   bool fadeInMenu = false;
-
-  // ★ アラーム管理
-  Set<String> activeAlarms = {};
 
   @override
   void initState() {
     super.initState();
     loadFavorites();
-
-    // ★ アラームが鳴ったら UI を自動リセット
-    html.window.onMessage.listen((event) {
-      if (event.data is Map && event.data["type"] == "alarm-fired") {
-        final key = event.data["key"];
-        activeAlarms.remove(key);
-        setState(() {});
-      }
-    });
   }
 
   Future<void> loadFavorites() async {
@@ -68,84 +53,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ アラーム設定ロジック
-  void setAlarmForBus(BuildContext context, String departTimeHHmm) {
-    final now = DateTime.now();
-
-    final parts = departTimeHHmm.split(":");
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-
-    DateTime target = DateTime(now.year, now.month, now.day, hour, minute);
-
-    // すでに出発
-    if (target.isBefore(now)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("今日のこの便はすでに出発しました。アラームは設定できません。"),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    // 10分以内
-    final diff = target.difference(now).inMinutes;
-    if (diff < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("10分以内にバスが来る予定です。アラームは設定できません。"),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    // 10分前
-    final alarmTime = target.subtract(const Duration(minutes: 10));
-
-    html.Notification.requestPermission().then((permission) {
-      if (permission == "granted") {
-        html.window.navigator.serviceWorker?.controller?.postMessage({
-          "type": "set-alarm",
-          "timestamp": alarmTime.millisecondsSinceEpoch,
-          "key": departTimeHHmm,
-        });
-
-        activeAlarms.add(departTimeHHmm);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("アラームを設定しました。"),
-            duration: Duration(seconds: 3),
-          ),
-        );
-
-        setState(() {});
-      }
-    });
-  }
-
-  // ★ アラーム解除
-  void cancelAlarm(String departTimeHHmm) {
-    html.window.navigator.serviceWorker?.controller?.postMessage({
-      "type": "cancel-alarm",
-      "key": departTimeHHmm,
-    });
-
-    activeAlarms.remove(departTimeHHmm);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("アラームを解除しました。"),
-        duration: Duration(seconds: 3),
-      ),
-    );
-
-    setState(() {});
-  }
-
-  // ★ カードタップ時の処理
   void onSelectRow(Map row, int index) {
     final key = cardKeys[index];
     if (key == null) return;
@@ -192,6 +99,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Color vehicleBorderColor(String vehicle) {
     if (vehicle.contains("舞")) return const Color(0xFFC62828);
     return const Color(0xFF1565C0);
+  }
+
+  Color vehicleBgColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFFFE4E1);
+    return const Color(0xFFE0F0FF);
   }
 
   String bgImage(String vehicle) {
@@ -316,26 +228,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     opacity: fadeInMenu ? 1 : 0,
                     child: Column(
                       children: [
-                        // ★ アラームボタン（ON/OFF 切替）
-                        Builder(builder: (_) {
-                          final departTime = selectedRow!['depart_time'];
-                          final isActive = activeAlarms.contains(departTime);
-
-                          return _menuButton(
-                            isActive ? "アラームを解除する" : "アラームを設定する",
-                            Icons.alarm,
-                            () {
-                              if (isActive) {
-                                cancelAlarm(departTime);
-                              } else {
-                                setAlarmForBus(context, departTime);
-                              }
-                            },
-                          );
-                        }),
-
-                        const SizedBox(height: 22),
-
                         _menuButton("経路・時刻の詳細を見る", Icons.route, () {
                           Navigator.push(
                             context,
@@ -385,11 +277,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 直通カード
+  // ★ 直通カード（背景色修正済み）
   Widget _buildDirectCard(Map row, String vehicle) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
+        color: vehicleBgColor(vehicle), // ★ 背景色を設定
         border: Border.all(
           color: vehicleBorderColor(vehicle),
           width: 3,
@@ -406,8 +299,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.18),
-            BlendMode.srcATop,
+            Colors.white.withOpacity(0.15), // ★ 画像を薄くするだけ
+            BlendMode.dstATop,              // ★ 背景色を殺さない
           ),
         ),
       ),
@@ -449,7 +342,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // ★ 乗換カード
+  // ★ 乗換カード（背景色修正済み）
   Widget _buildMultiLegCard(Map row, String vehicle) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -467,6 +360,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border.all(color: Colors.black, width: 2),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -476,7 +370,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
             offset: const Offset(2, 2),
           ),
         ],
-        color: Colors.white,
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
