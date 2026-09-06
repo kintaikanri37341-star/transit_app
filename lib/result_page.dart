@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:html' as html; // ★ 追加
 import 'route_detail_page.dart';
 
 class ResultPage extends StatefulWidget {
@@ -26,31 +25,19 @@ class _ResultPageState extends State<ResultPage> {
 
   Map<String, dynamic>? selectedRow;
 
-  // ★ カード位置取得用
+  // カード位置取得用
   final Map<int, GlobalKey> cardKeys = {};
   double selectedTop = 0;
 
-  // ★ アニメーション制御
+  // アニメーション制御
   bool showOverlay = false;
   bool fadeOutList = false;
   bool fadeInMenu = false;
-
-  // ★ アラーム管理
-  Set<String> activeAlarms = {};
 
   @override
   void initState() {
     super.initState();
     fetchResults();
-
-    // ★ アラームが鳴ったら UI を自動リセット
-    html.window.onMessage.listen((event) {
-      if (event.data is Map && event.data["type"] == "alarm-fired") {
-        final key = event.data["key"];
-        activeAlarms.remove(key);
-        setState(() {});
-      }
-    });
   }
 
   Future<void> fetchResults() async {
@@ -68,99 +55,30 @@ class _ResultPageState extends State<ResultPage> {
     });
   }
 
-  // ★ アラーム設定ロジック
-  void setAlarmForBus(BuildContext context, String departTimeHHmm) {
-    final now = DateTime.now();
-
-    final parts = departTimeHHmm.split(":");
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-
-    DateTime target = DateTime(now.year, now.month, now.day, hour, minute);
-
-    // すでに出発
-    if (target.isBefore(now)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("今日のこの便はすでに出発しました。アラームは設定できません。"),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    // 10分以内
-    final diff = target.difference(now).inMinutes;
-    if (diff < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("10分以内にバスが来る予定です。アラームは設定できません。"),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    // 10分前
-    final alarmTime = target.subtract(const Duration(minutes: 10));
-
-    html.Notification.requestPermission().then((permission) {
-      if (permission == "granted") {
-        html.window.navigator.serviceWorker?.controller?.postMessage({
-          "type": "set-alarm",
-          "timestamp": alarmTime.millisecondsSinceEpoch,
-          "key": departTimeHHmm,
-        });
-
-        activeAlarms.add(departTimeHHmm);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("アラームを設定しました。"),
-            duration: Duration(seconds: 3),
-          ),
-        );
-
-        setState(() {});
-      }
-    });
-  }
-
-  // ★ アラーム解除
-  void cancelAlarm(String departTimeHHmm) {
-    html.window.navigator.serviceWorker?.controller?.postMessage({
-      "type": "cancel-alarm",
-      "key": departTimeHHmm,
-    });
-
-    activeAlarms.remove(departTimeHHmm);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("アラームを解除しました。"),
-        duration: Duration(seconds: 3),
-      ),
-    );
-
-    setState(() {});
-  }
-
   String formatTime(String? t) {
     if (t == null) return "";
     return t.substring(0, 5);
   }
 
+  // 背景色（舞ちゃん＝ピンク、幸ちゃん＝青）
+  Color vehicleBgColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFFFE4E1);
+    return const Color(0xFFE0F0FF);
+  }
+
+  // 枠線色
+  Color vehicleBorderColor(String vehicle) {
+    if (vehicle.contains("舞")) return const Color(0xFFC62828);
+    return const Color(0xFF1565C0);
+  }
+
+  // 背景画像
   String bgImage(String vehicle) {
     if (vehicle.contains("舞")) {
       return "assets/images/maichan.jpg";
     } else {
       return "assets/images/sachichan.jpg";
     }
-  }
-
-  Color vehicleBorderColor(String vehicle) {
-    if (vehicle.contains("舞")) return const Color(0xFFC62828);
-    return const Color(0xFF1565C0);
   }
 
   String routeLabel(String routeType, String vehicle) {
@@ -200,7 +118,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ カードタップ時の処理
+  // カードタップ時の処理
   void onSelectRow(Map row, int index) {
     final key = cardKeys[index];
     if (key == null) return;
@@ -352,26 +270,6 @@ class _ResultPageState extends State<ResultPage> {
                     opacity: fadeInMenu ? 1 : 0,
                     child: Column(
                       children: [
-                        // ★ アラームボタン（ON/OFF 切替）
-                        Builder(builder: (_) {
-                          final departTime = selectedRow!['depart_time'];
-                          final isActive = activeAlarms.contains(departTime);
-
-                          return _menuButton(
-                            isActive ? "アラームを解除する" : "アラームを設定する",
-                            Icons.alarm,
-                            () {
-                              if (isActive) {
-                                cancelAlarm(departTime);
-                              } else {
-                                setAlarmForBus(context, departTime);
-                              }
-                            },
-                          );
-                        }),
-
-                        const SizedBox(height: 22),
-
                         _menuButton("経路・時刻の詳細を見る", Icons.route, () {
                           Navigator.push(
                             context,
@@ -422,10 +320,11 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
-  // ★ 駅名は表示しない（AppBar に出ているため）
+  // ★ 背景色を正しく反映する直通カード
   Widget _buildDirectCard(Map row, String vehicle, String routeType) {
     return Container(
       decoration: BoxDecoration(
+        color: vehicleBgColor(vehicle), // ← 背景色を直接指定
         border: Border.all(
           color: vehicleBorderColor(vehicle),
           width: 3,
@@ -442,8 +341,8 @@ class _ResultPageState extends State<ResultPage> {
           image: AssetImage(bgImage(vehicle)),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.18),
-            BlendMode.srcATop,   // ★ 最小修正：ここだけ変更
+            Colors.white.withOpacity(0.15), // ← 画像を薄くするだけ
+            BlendMode.dstATop,              // ← 背景色を殺さないモード
           ),
         ),
       ),
@@ -486,6 +385,7 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
+  // ★ 背景色を正しく反映する乗換カード
   Widget _buildMultiLegCard(Map row, String vehicle, String routeType) {
     final parts = vehicle.split("→");
     final firstVehicle = parts[0];
@@ -505,6 +405,7 @@ class _ResultPageState extends State<ResultPage> {
 
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border.all(color: Colors.black, width: 2),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -514,7 +415,6 @@ class _ResultPageState extends State<ResultPage> {
             offset: const Offset(2, 2),
           ),
         ],
-        color: Colors.white,
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
