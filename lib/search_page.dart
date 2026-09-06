@@ -102,7 +102,6 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
 
-                    // ★ 検索欄：太字22px
                     TextField(
                       controller: controller,
                       style: const TextStyle(
@@ -237,25 +236,30 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ★ 出発駅／到着駅ボタン → 22px ＋ 高さ72px
+    final rounded = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    );
+
     final baseButton = ElevatedButton.styleFrom(
       foregroundColor: Colors.black,
+      backgroundColor: const Color(0xFFC8E6C9),
       side: const BorderSide(color: Colors.black, width: 2),
-      minimumSize: const Size(double.infinity, 72), // ★ 2行分の高さ
+      minimumSize: const Size(double.infinity, 72),
+      shape: rounded,
       textStyle: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
       ),
     );
 
-    // ★ 入替ボタン → フォント20px（文字＋アイコン）
     final swapButtonStyle = ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFFF59D),
       foregroundColor: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
+      shape: rounded,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       textStyle: const TextStyle(
-        fontSize: 20, // ★ 20px
+        fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -273,71 +277,81 @@ class _SearchPageState extends State<SearchPage> {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                const double buttonHeight = 72; // 緑ボタンの高さ
-                const double labelHeight = 24;
+                const double buttonHeight = 72;
                 const double spacing = 24;
 
-                // ★ 視覚的に完全中央になるよう +6px 補正
                 final double swapTop =
-                    labelHeight + buttonHeight + (spacing / 2) + 6;
+                    buttonHeight + (spacing / 2);
 
                 return Stack(
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
-                          '出発駅',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
                         ElevatedButton(
-                          style: baseButton.copyWith(
-                            backgroundColor: const MaterialStatePropertyAll(
-                                Color(0xFFC8E6C9)),
-                          ),
+                          style: baseButton,
                           onPressed: () => openStationSelector(true),
-                          child: Text(depart ?? '出発駅を選択'),
+                          child: Row(
+                            children: [
+                              const Text(
+                                '出発駅：',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  depart ?? '出発駅を選択',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+
                         const SizedBox(height: spacing),
-                        const Text(
-                          '到着駅',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
+
                         ElevatedButton(
-                          style: baseButton.copyWith(
-                            backgroundColor: const MaterialStatePropertyAll(
-                                Color(0xFFC8E6C9)),
-                          ),
+                          style: baseButton,
                           onPressed: () => openStationSelector(false),
-                          child: Text(arrive ?? '到着駅を選択'),
+                          child: Row(
+                            children: [
+                              const Text(
+                                '到着駅：',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  arrive ?? '到着駅を選択',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
 
-                    // ★ 入替ボタン（上下中央・右端）
                     Positioned(
                       right: 0,
                       top: swapTop,
                       child: ElevatedButton(
                         style: swapButtonStyle,
                         onPressed: _swapStations,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.swap_vert,
-                                size: 20, color: Colors.black),
-                            SizedBox(width: 4),
-                            Text('入替'),
-                          ],
-                        ),
+                        child: const Icon(Icons.swap_vert,
+                            size: 24, color: Colors.black),
                       ),
                     ),
                   ],
@@ -347,7 +361,6 @@ class _SearchPageState extends State<SearchPage> {
 
             const SizedBox(height: 40),
 
-            // ★ 検索ボタン → 高さ72px
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: (depart != null && arrive != null)
@@ -355,6 +368,7 @@ class _SearchPageState extends State<SearchPage> {
                     : const Color(0xFFC8E6C9),
                 foregroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 72),
+                shape: rounded,
                 side: BorderSide(
                   color: (depart != null && arrive != null)
                       ? const Color(0xFFC62828)
@@ -380,10 +394,9 @@ class _SearchPageState extends State<SearchPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.search,
-                      size: 22, color: Colors.black),
+                  Icon(Icons.search, size: 22, color: Colors.black),
                   SizedBox(width: 8),
-                  Text('検索する'),
+                  Text('検索'),
                 ],
               ),
             ),
